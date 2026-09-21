@@ -50,6 +50,14 @@ describe('reusable workflow security policy', () => {
     );
   });
 
+  it('pins every nested Action to a full commit SHA', () => {
+    for (const job of Object.values(workflow.jobs)) {
+      for (const step of job.steps) {
+        if (step.uses) expect(step.uses).toMatch(/@[a-f0-9]{40}$/);
+      }
+    }
+  });
+
   it('never checks out PR scripts into credentialed jobs', () => {
     for (const job of [workflow.jobs.deploy, workflow.jobs.cleanup]) {
       expect(job.environment).toBe('${{ inputs.environment }}');

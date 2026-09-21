@@ -34,7 +34,7 @@ Additional validation tightens comment identity, URL paths and credentials, conf
 
 ## Validation
 
-- 70 Action/core tests, including real subprocess tests and YAML workflow-policy assertions.
+- 71 Action/core tests, including real subprocess tests and YAML workflow-policy assertions.
 - 15 site interaction tests.
 - Formatting, typed linting, and strict TypeScript checks.
 - Self-contained Node 24 CommonJS Action bundles and generated license notices.

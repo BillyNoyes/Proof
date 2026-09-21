@@ -304,10 +304,10 @@ gh variable set --env theme-preview SHOPIFY_FLAG_STORE --body example.myshopify.
             </p>
             <p class="notice">
               This experimental example uses <code>@main</code>, which can
-              change. There is no <code>v1</code> release yet. Proof’s internal
-              Action references also use <code>@main</code>; pinning only this
-              caller does not pin the entire dependency chain. Do not treat this
-              example as a production release.
+              change. There is no <code>v1</code> release yet. Internal Action
+              references are pinned to a reviewed bundle commit. Pin this caller
+              to a reviewed commit SHA when validating a release candidate. Do
+              not treat this example as a production release.
             </p>
             <div class="code-block" x-data="copyCode($el)">
               <div class="code-header">
