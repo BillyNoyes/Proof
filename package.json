@@ -1,0 +1,51 @@
+{
+  "name": "theme-proof",
+  "version": "0.1.0-alpha.0",
+  "description": "Automatic pull request previews for Shopify Liquid themes",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": {
+    "name": "Billy Noyes",
+    "url": "https://billynoyes.co.uk/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BillyNoyes/Proof.git"
+  },
+  "keywords": [
+    "github-action",
+    "pull-request",
+    "preview",
+    "shopify",
+    "shopify-theme",
+    "liquid",
+    "theme-development"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsup && node scripts/check-dist.mjs",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@actions/core": "3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.13",
+    "eslint": "10.11.0",
+    "prettier": "3.9.8",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.0",
+    "vitest": "4.1.11"
+  },
+  "packageManager": "pnpm@10.28.0"
+}

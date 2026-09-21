@@ -113,6 +113,26 @@ The deployment job:
 
 The workflow must not use `pull_request_target` to execute pull request code. Fork previews are disabled by default and require an explicit trusted workflow if supported later.
 
+## Project configuration
+
+Proof uses a static `theme-proof.config.json` file with JSON Schema support. The file is read only by the untrusted build job and can define:
+
+- `build.workingDirectory`: where setup, install, and build commands run.
+- `build.setup`: optional package-manager or toolchain setup command.
+- `build.install`: optional install command.
+- `build.command`: optional build command.
+- `build.themeDirectory`: deployable theme path after the build.
+
+All paths are relative to the repository root and cannot escape the GitHub workspace. Omitting all three commands supports standard themes such as Dawn that need no build. The current schema deliberately does not accept store domains, credentials, theme IDs, live-theme flags, or arbitrary Shopify CLI arguments.
+
+Preview target policy belongs to the trusted workflow or GitHub Environment, not pull request code. The default target is a per-PR development context. Future modes can include:
+
+- `development-context`: create or reuse the isolated PR context; default.
+- `unpublished`: create and retain an unpublished theme, then update its recorded ID.
+- `existing`: update a trusted, fixed theme ID after verifying through Shopify that its role is not live.
+
+The latter two modes must never accept their theme ID from a PR-controlled config file.
+
 ## Preview identity and lifecycle
 
 A context must be unique across repositories that connect to the same store. Derive it from stable identifiers rather than repository names alone, for example:
@@ -186,11 +206,15 @@ A reusable workflow is preferable to a single action for the full preview flow b
 
 ## Proposed interface
 
-Inputs should remain small and explicit:
+Build-action inputs should remain small and explicit:
 
-- `theme-path`: deployable theme directory within the build artifact.
-- `build-command`: command run only in the untrusted build job.
+- `config`: static JSON config path, default `theme-proof.config.json`.
+
+Deployment inputs are trusted workflow policy:
+
+- `theme-path`: validated theme artifact downloaded from the build job.
 - `context`: stable preview context, defaulted from repository and pull request IDs.
+- `target-mode`: initially only `development-context`.
 - `shopify-cli-version`: pinned supported CLI version.
 - `strict`: require Theme Check success, default `true`.
 - `cleanup`: remove previews when pull requests close, default `true`.
@@ -205,6 +229,28 @@ Outputs:
 
 Avoid accepting arbitrary Shopify CLI arguments in the privileged job. Model safe options explicitly and reject live-theme flags.
 
+## Current implementation status
+
+Implemented in the initial prototype:
+
+- Static versioned project configuration and JSON Schema.
+- Setup, install, build, and no-build paths.
+- Clean artifact staging and strict deployment validation.
+- Shopify CLI command construction without shell interpolation in privileged jobs.
+- Credentials supplied through environment variables rather than arguments.
+- Shopify CLI version and JSON output validation.
+- Development-context deployment and theme deletion.
+- Bot-owned pull request comment state.
+- Reusable workflow separating untrusted build, privileged deployment, and cleanup.
+- Unit tests and self-contained Node 24 Action bundles.
+
+Still unproven until store-backed validation:
+
+- Development-context reuse with Theme Access under concurrent pull request updates.
+- Preview and Theme Editor links on protected storefronts.
+- Cleanup behavior for expired or manually removed development themes.
+- End-to-end reusable workflow permissions and artifact semantics in a consumer repository.
+
 ## MVP milestones
 
 ### Milestone 1: research spike
@@ -217,6 +263,8 @@ Avoid accepting arbitrary Shopify CLI arguments in the privileged job. Model saf
 
 ### Milestone 2: deployment core
 
+- Parse and validate static project configuration.
+- Support explicit install/build commands and no-build themes.
 - Validate theme artifacts.
 - Wrap pinned Shopify CLI commands without shell interpolation.
 - Parse and validate JSON output.

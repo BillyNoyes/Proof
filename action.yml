@@ -1,0 +1,47 @@
+name: Theme Proof
+description: Deploy a validated Shopify theme preview and update its pull request comment
+author: Billy Noyes
+branding:
+  icon: eye
+  color: blue
+inputs:
+  mode:
+    description: Deploy or clean up a pull request preview
+    default: deploy
+  theme-path:
+    description: Path to the prepared Shopify theme artifact
+    default: .
+  store:
+    description: Full myshopify.com store domain
+    required: true
+  password:
+    description: Shopify Theme Access password
+    required: true
+  github-token:
+    description: GitHub token with pull request write access
+    required: true
+  comment-author:
+    description: GitHub account expected to own Theme Proof state comments
+    default: github-actions[bot]
+  context:
+    description: Stable Shopify development context; generated from repository and pull request IDs when omitted
+  pull-request-number:
+    description: Pull request number; read from the event payload when omitted
+  strict:
+    description: Require Shopify Theme Check to pass before upload
+    default: 'true'
+  shopify-command:
+    description: Shopify CLI executable on PATH
+    default: shopify
+outputs:
+  theme-id:
+    description: Shopify theme ID
+  preview-url:
+    description: Storefront preview URL
+  editor-url:
+    description: Shopify Theme Editor URL
+  context:
+    description: Stable preview context
+runs:
+  using: node24
+  main: dist/action.js

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/BillyNoyes/Proof/main/schema/theme-proof.schema.json",
+  "title": "Theme Proof configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "const": 1
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "workingDirectory": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Directory, relative to the repository root, where install and build commands run."
+        },
+        "themeDirectory": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Deployable Shopify theme directory, relative to the repository root."
+        },
+        "setup": {
+          "type": ["string", "null"],
+          "description": "Optional toolchain setup command executed first in the untrusted build job."
+        },
+        "install": {
+          "type": ["string", "null"],
+          "description": "Optional dependency installation command executed only in the untrusted build job."
+        },
+        "command": {
+          "type": ["string", "null"],
+          "description": "Optional build command executed only in the untrusted build job."
+        }
+      }
+    }
+  }
+}

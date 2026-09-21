@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/BillyNoyes/Proof/main/schema/theme-proof.schema.json",
+  "version": 1,
+  "build": {
+    "workingDirectory": ".",
+    "setup": "npm install --global pnpm@10.28.0",
+    "install": "pnpm install --frozen-lockfile",
+    "command": "pnpm build",
+    "themeDirectory": "."
+  }
+}

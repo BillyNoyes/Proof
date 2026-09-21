@@ -1,0 +1,16 @@
+name: Theme Proof Build
+description: Run an untrusted project build and validate its Shopify theme artifact
+inputs:
+  config:
+    description: Relative path to Theme Proof's static JSON configuration
+    default: theme-proof.config.json
+outputs:
+  theme-path:
+    description: Absolute path to the validated theme directory
+  files:
+    description: Number of files in the theme artifact
+  bytes:
+    description: Total bytes in the theme artifact
+runs:
+  using: node24
+  main: ../../dist/build-action.js
