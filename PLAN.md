@@ -66,7 +66,7 @@ The store owner installs Shopify's Theme Access app, generates a dedicated passw
 - `SHOPIFY_CLI_THEME_TOKEN` as an Environment secret.
 - `SHOPIFY_FLAG_STORE` as a non-sensitive Environment variable containing the full myshopify.com domain.
 
-The reusable workflow attaches the Environment only to deployment and cleanup jobs, so callers don't forward the credential and the untrusted build job can't read it. Repositories can add required reviewers or deployment restrictions, although requiring review prevents fully automatic previews.
+The reusable workflow attaches the Environment only to deployment and cleanup jobs. Callers authorize the named `SHOPIFY_CLI_THEME_TOKEN` secret through an explicit mapping rather than broad inheritance; the actual password remains environment-scoped and the untrusted build job has no Environment. Repositories can add required reviewers or deployment restrictions, although requiring review prevents fully automatic previews.
 
 The workflow uses the repository `GITHUB_TOKEN` only for pull request comments and checks. It needs minimal permissions:
 

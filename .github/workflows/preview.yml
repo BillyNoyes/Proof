@@ -19,6 +19,10 @@ on:
         description: Pinned Shopify CLI version
         type: string
         default: 4.8.0
+    secrets:
+      SHOPIFY_CLI_THEME_TOKEN:
+        description: Authorize this named secret in the caller; keep the password in the deployment Environment
+        required: false
 
 permissions:
   contents: read

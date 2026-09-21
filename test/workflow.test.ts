@@ -14,6 +14,7 @@ const text = await readFile(
   'utf8',
 );
 const workflow = parse(text) as {
+  on: {workflow_call: {secrets: Record<string, {required: boolean}>}};
   permissions: Record<string, string>;
   jobs: {build: Job; deploy: Job; cleanup: Job};
 };
@@ -28,6 +29,21 @@ describe('reusable workflow security policy', () => {
       'persist-credentials': false,
       ref: '${{ github.event.pull_request.head.sha }}',
     });
+  });
+
+  it('declares and documents only the named Theme Access secret', async () => {
+    expect(Object.keys(workflow.on.workflow_call.secrets)).toEqual([
+      'SHOPIFY_CLI_THEME_TOKEN',
+    ]);
+    expect(
+      workflow.on.workflow_call.secrets.SHOPIFY_CLI_THEME_TOKEN?.required,
+    ).toBe(false);
+    for (const path of ['../README.md', '../site/docs/index.html']) {
+      const example = await readFile(new URL(path, import.meta.url), 'utf8');
+      expect(example).toContain(
+        'SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}',
+      );
+    }
   });
 
   it('enforces same-repository pull_request events for every job', () => {

@@ -275,8 +275,9 @@ gh variable set --env theme-preview SHOPIFY_FLAG_STORE --body example.myshopify.
               <p class="copy-status" role="status" x-text="status"></p>
             </div>
             <p>
-              Only deployment and cleanup jobs use this environment. You do not
-              need to forward secrets in the caller workflow or use
+              Only deployment and cleanup jobs use this environment. Keep the
+              password environment-scoped and include the named secrets mapping
+              below to authorize access from the called workflow. Avoid broad
               <code>secrets: inherit</code>. Required reviewers can add an
               approval step to both deployment and cleanup.
             </p>
@@ -343,7 +344,9 @@ jobs:
     uses: BillyNoyes/Proof/.github/workflows/preview.yml@main
     with:
       config: theme-proof.config.json
-      environment: theme-preview</code></pre>
+      environment: theme-preview
+    secrets:
+      SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}</code></pre>
               <p class="copy-status" role="status" x-text="status"></p>
             </div>
             <p>

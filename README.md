@@ -68,7 +68,7 @@ gh secret set --env theme-preview SHOPIFY_CLI_THEME_TOKEN
 gh variable set --env theme-preview SHOPIFY_FLAG_STORE --body example.myshopify.com
 ```
 
-The reusable workflow reads the secret and variable only in its privileged deployment and cleanup jobs. The untrusted build job does not receive the environment.
+The reusable workflow reads the secret and variable only in its privileged deployment and cleanup jobs. The untrusted build job does not receive the environment. Keep the password environment-scoped and include the named `secrets` mapping shown below to authorize access from the called workflow; do not use broad `secrets: inherit`.
 
 For development-store experiments, add this caller workflow. `@main` is not a stable release; use a reviewed commit SHA when validating a release candidate. See [RELEASING.md](RELEASING.md) for the required store-backed checks and Marketplace publication steps.
 
@@ -90,6 +90,8 @@ jobs:
     with:
       config: theme-proof.config.json
       environment: theme-preview
+    secrets:
+      SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
 ```
 
 Fork pull requests do not receive the Environment secret and therefore do not deploy automatically. Delete the password in the Theme Access app to revoke Proof's store access, then remove or replace the GitHub Environment secret.
