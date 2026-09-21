@@ -160,13 +160,6 @@
     @apply max-w-[38ch] text-lg/7;
     color: var(--muted);
   }
-  .release-note {
-    @apply text-[13px]/5;
-    color: var(--muted);
-  }
-  .release-note a {
-    text-decoration: underline;
-  }
   .workflow {
     @apply min-w-0;
   }
