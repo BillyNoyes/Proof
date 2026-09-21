@@ -1,0 +1,24 @@
+{
+  "name": "proof-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "tsc && node --experimental-strip-types --test scripts/check-interactions.mjs && vite build && node scripts/check-build.mjs",
+    "test:browser": "node scripts/check-browser.mjs"
+  },
+  "dependencies": {
+    "alpinejs": "3.17.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "@types/alpinejs": "3.13.11",
+    "@types/node": "24.10.13",
+    "playwright": "1.58.2",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vite": "8.2.2"
+  }
+}

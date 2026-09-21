@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Pull request previews for Shopify themes. Build your theme, review it on a preview store, and keep the links in GitHub. An open-source GitHub Action, in development."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="theme-color"
+      content="#ffffff"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#000000"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta property="og:title" content="Proof · Preview your Shopify theme" />
+    <meta
+      property="og:description"
+      content="Review the theme before the merge. Pull request previews for Shopify themes, powered by GitHub Actions."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Proof" />
+    <meta property="og:url" content="https://billynoyes.github.io/Proof/" />
+    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href="https://billynoyes.github.io/Proof/" />
+    <link rel="icon" href="%BASE_URL%proof.svg" type="image/svg+xml" />
+    <link
+      rel="preload"
+      href="%BASE_URL%fonts/inter_n4.b2a3f24c19b4de56e8871f609e73ca7f6d2e2bb9.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="%BASE_URL%fonts/inter_n7.02711e6b374660cfc7915d1afc1c204e633421e4.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+    <title>Proof · Preview your Shopify theme</title>
+  </head>
+  <body>
+    <div class="site-shell">
+      <a class="skip-link" href="#main">Skip to content</a>
+      <header class="site-header">
+        <a class="wordmark" href="%BASE_URL%" aria-label="Proof home"
+          ><img src="%BASE_URL%proof.svg" alt="" width="28" height="28" /><span
+            >Proof</span
+          ></a
+        >
+        <nav class="primary-nav" aria-label="Primary navigation">
+          <a href="%BASE_URL%docs/">Docs</a
+          ><a href="https://github.com/BillyNoyes/Proof"
+            >GitHub <span aria-hidden="true">↗</span></a
+          >
+        </nav>
+      </header>
+      <main class="home-main" id="main" tabindex="-1">
+        <div class="hero-copy">
+          <p class="text-sm muted">Pull request previews for Shopify themes</p>
+          <h1>Review the theme.<br />Before the merge.</h1>
+          <p class="hero-description">
+            Give each pull request a theme preview. Keep the storefront and
+            Theme Editor links right where the review happens.
+          </p>
+          <div class="flex flex-wrap items-center gap-3">
+            <a class="button button-primary" href="%BASE_URL%docs/"
+              >Read the docs <span aria-hidden="true">→</span></a
+            ><a class="button" href="https://github.com/BillyNoyes/Proof"
+              >View on GitHub</a
+            >
+          </div>
+          <p class="release-note">
+            In development. Not yet on Marketplace.<br /><a
+              href="%BASE_URL%docs/#release-status"
+              >Follow the path to the first release.</a
+            >
+          </p>
+        </div>
+        <section class="workflow" aria-labelledby="workflow-title">
+          <div class="workflow-heading">
+            <h2 id="workflow-title">From pull request to preview</h2>
+            <span>GitHub Actions</span>
+          </div>
+          <ol class="workflow-list">
+            <li class="workflow-step">
+              <span class="workflow-node" aria-hidden="true">1</span>
+              <div class="min-w-0">
+                <h3>Build your theme</h3>
+                <p>
+                  Your commands, or no build at all. No Shopify credentials in
+                  this job.
+                </p>
+                <div class="workflow-code">
+                  <pre
+                    tabindex="0"
+                    role="region"
+                    aria-label="Example no-build configuration"
+                  ><code>{
+  "version": 1,
+  "build": { "themeDirectory": "." }
+}</code></pre>
+                </div>
+              </div>
+            </li>
+            <li class="workflow-step">
+              <span class="workflow-node" aria-hidden="true">2</span>
+              <div>
+                <h3>Deploy the preview</h3>
+                <p>
+                  A separate job validates the theme files and deploys with
+                  Theme Access.
+                </p>
+              </div>
+            </li>
+            <li class="workflow-step">
+              <span class="workflow-node" aria-hidden="true">3</span>
+              <div>
+                <h3>Review it in context</h3>
+                <p>
+                  One PR comment for preview links. Cleanup when the pull
+                  request closes.
+                </p>
+              </div>
+            </li>
+          </ol>
+          <p class="workflow-note">
+            Dawn, Easel, or your own toolchain. The build is yours.
+          </p>
+        </section>
+      </main>
+      <footer class="site-footer">
+        <span>Open source. MIT licensed.</span
+        ><span
+          >Built by <a href="https://billynoyes.co.uk/">Billy Noyes</a>.
+          Independent of Shopify.</span
+        >
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,394 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: Inter;
+  src: url('/fonts/inter_n4.b2a3f24c19b4de56e8871f609e73ca7f6d2e2bb9.woff2')
+    format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Inter;
+  src: url('/fonts/inter_n7.02711e6b374660cfc7915d1afc1c204e633421e4.woff2')
+    format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: Inter, sans-serif;
+  --font-mono:
+    'SF Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+:root {
+  color-scheme: light dark;
+  --canvas: #fff;
+  --ink: #171717;
+  --muted: #646464;
+  --line: #e5e5e5;
+  --panel: #fafafa;
+  --code: #f3f3f3;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --canvas: #000;
+    --ink: #f2f2f2;
+    --muted: #a3a3a3;
+    --line: #292929;
+    --panel: #0a0a0a;
+    --code: #1b1b1b;
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+  a {
+    color: inherit;
+    text-underline-offset: 4px;
+  }
+  button,
+  summary {
+    cursor: pointer;
+  }
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 5px;
+  }
+  ::selection {
+    background: var(--ink);
+    color: var(--canvas);
+  }
+  [x-cloak] {
+    display: none !important;
+  }
+}
+
+@layer components {
+  .site-shell {
+    @apply mx-auto flex min-h-dvh w-full flex-col px-3 md:px-5;
+  }
+  .site-header {
+    @apply flex items-center justify-between gap-6 py-4;
+  }
+  .wordmark {
+    @apply inline-flex items-center gap-2.5 text-xl/6 no-underline;
+  }
+  .wordmark img {
+    @apply size-7;
+  }
+  .primary-nav {
+    @apply flex items-center gap-6 text-sm;
+  }
+  .primary-nav a {
+    text-decoration: none;
+  }
+  .primary-nav a:hover,
+  .primary-nav [aria-current='page'] {
+    text-decoration: underline;
+  }
+  .skip-link {
+    @apply fixed left-4 top-4 z-50 -translate-y-[200%] rounded px-4 py-2 focus:translate-y-0;
+    background: var(--ink);
+    color: var(--canvas);
+  }
+  .site-footer {
+    @apply flex flex-col gap-3 py-6 text-[13px]/5 md:flex-row md:items-center md:justify-between;
+    color: var(--muted);
+  }
+  .site-footer a {
+    text-decoration: underline;
+  }
+  .muted {
+    color: var(--muted);
+  }
+  .button {
+    @apply inline-flex min-h-11 items-center justify-center gap-3 rounded-md border px-5 py-2 text-sm no-underline;
+    border-color: var(--line);
+  }
+  .button:hover {
+    background: var(--code);
+  }
+  .button-primary {
+    background: var(--ink);
+    color: var(--canvas);
+    border-color: var(--ink);
+  }
+  .button-primary:hover {
+    opacity: 0.85;
+    background: var(--ink);
+  }
+  .home-main {
+    @apply mx-auto my-auto grid w-full max-w-6xl items-center gap-12 py-10 lg:grid-cols-2 lg:gap-16;
+  }
+  .hero-copy {
+    @apply flex flex-col items-start gap-6;
+  }
+  .hero-copy h1 {
+    font-size: clamp(2.5rem, 4.4vw, 4rem);
+    font-weight: 700;
+    line-height: 1.06;
+    letter-spacing: -0.045em;
+  }
+  .hero-description {
+    @apply max-w-[38ch] text-lg/7;
+    color: var(--muted);
+  }
+  .release-note {
+    @apply text-[13px]/5;
+    color: var(--muted);
+  }
+  .release-note a {
+    text-decoration: underline;
+  }
+  .workflow {
+    @apply min-w-0;
+  }
+  .workflow-heading {
+    @apply mb-6 flex items-center justify-between gap-4 text-sm;
+  }
+  .workflow-heading span {
+    color: var(--muted);
+  }
+  .workflow-list {
+    @apply m-0 list-none p-0;
+  }
+  .workflow-step {
+    @apply relative grid grid-cols-[24px_1fr] gap-4 pb-6;
+  }
+  .workflow-step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 25px;
+    bottom: 0;
+    border-left: 1px solid var(--line);
+  }
+  .workflow-node {
+    @apply relative mt-0.5 flex size-6 items-center justify-center rounded-full border text-xs;
+    border-color: var(--line);
+    background: var(--canvas);
+  }
+  .workflow-step h3 {
+    @apply text-base/6 font-bold;
+  }
+  .workflow-step p {
+    @apply mt-1 text-sm/6;
+    color: var(--muted);
+  }
+  .workflow-step:last-child {
+    padding-bottom: 0;
+  }
+  .workflow-code {
+    @apply mt-3 min-w-0 rounded-md border;
+    border-color: var(--line);
+    background: var(--panel);
+  }
+  .workflow-code pre {
+    @apply m-0 overflow-x-auto px-4 py-3 font-mono text-[13px]/6;
+  }
+  .workflow-note {
+    @apply mt-6 text-[13px]/5;
+    color: var(--muted);
+  }
+  .docs-layout {
+    @apply flex items-start gap-12 pb-16 pt-6;
+  }
+  .docs-sidebar {
+    @apply sticky top-8 hidden w-52 shrink-0 lg:block;
+    max-height: calc(100dvh - 4rem);
+    overflow-y: auto;
+  }
+  .docs-nav {
+    @apply flex flex-col items-start py-2;
+  }
+  .docs-nav a {
+    @apply py-2 text-sm no-underline;
+    color: var(--muted);
+  }
+  .docs-nav a:hover,
+  .docs-nav a[aria-current='location'] {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+  .docs-main {
+    @apply min-w-0 flex-1;
+    max-width: 56rem;
+  }
+  .docs-intro {
+    @apply mb-10 flex flex-col gap-4;
+  }
+  .docs-intro h1 {
+    @apply text-4xl/10 font-bold tracking-tight;
+  }
+  .docs-intro > p {
+    max-width: 62ch;
+    color: var(--muted);
+  }
+  .mobile-nav {
+    @apply mb-8 rounded-md border px-4 py-3 lg:hidden;
+    border-color: var(--line);
+  }
+  .mobile-nav summary {
+    @apply text-sm;
+  }
+  .docs-section {
+    @apply flex flex-col gap-5 pb-12;
+    scroll-margin-top: 2rem;
+  }
+  .docs-section h2 {
+    @apply text-2xl/8 font-bold tracking-tight;
+  }
+  .docs-section h3 {
+    @apply text-lg/7 font-bold;
+  }
+  .docs-section > p,
+  .docs-section > ul,
+  .docs-section > ol {
+    max-width: 68ch;
+  }
+  .docs-section p,
+  .docs-section li {
+    color: var(--muted);
+  }
+  .docs-section strong {
+    color: var(--ink);
+  }
+  .docs-section ul {
+    @apply list-disc pl-5;
+  }
+  .docs-section ol {
+    @apply list-decimal pl-5;
+  }
+  .docs-section li + li {
+    margin-top: 0.5rem;
+  }
+  .docs-section a {
+    text-decoration: underline;
+  }
+  .docs-section :not(pre) > code {
+    @apply rounded px-1 py-0.5 font-mono text-[.875em];
+    background: var(--code);
+    color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+  .notice {
+    @apply rounded-md border px-4 py-3 text-sm/6;
+    border-color: var(--line);
+    background: var(--panel);
+  }
+  .code-block {
+    @apply relative min-w-0 rounded-md border;
+    border-color: var(--line);
+    background: var(--panel);
+  }
+  .code-header {
+    @apply flex flex-wrap items-center justify-between gap-2 border-b px-4 py-2 text-[13px]/5;
+    border-color: var(--line);
+    color: var(--muted);
+  }
+  .code-header span {
+    overflow-wrap: anywhere;
+  }
+  .code-header button {
+    @apply min-h-8 rounded border px-3 text-xs;
+    border-color: var(--line);
+    color: var(--ink);
+  }
+  .code-header button:hover {
+    background: var(--code);
+  }
+  .code-block pre {
+    @apply m-0 overflow-x-auto p-4 font-mono text-sm/6;
+    tab-size: 2;
+  }
+  .copy-status {
+    @apply px-4 text-xs/6;
+    color: var(--muted);
+  }
+  .copy-status:empty {
+    display: none;
+  }
+  .table-wrap {
+    @apply max-w-full overflow-x-auto;
+  }
+  .docs-table {
+    @apply w-full border-collapse text-left text-sm/6;
+  }
+  .docs-table caption {
+    @apply pb-3 text-left;
+    color: var(--muted);
+  }
+  .docs-table th,
+  .docs-table td {
+    @apply border-b py-3 pr-6 align-baseline;
+    border-color: var(--line);
+  }
+  .docs-table td {
+    color: var(--muted);
+  }
+  .docs-table th {
+    @apply font-bold;
+  }
+}
+
+@media (min-width: 1024px) and (max-height: 740px) {
+  .home-main {
+    padding-block: 1rem;
+    gap: 3rem;
+  }
+  .hero-copy {
+    gap: 1.25rem;
+  }
+  .hero-copy h1 {
+    font-size: 3rem;
+  }
+  .workflow-heading {
+    margin-bottom: 1rem;
+  }
+  .workflow-code pre {
+    padding-block: 0.5rem;
+    line-height: 1.25rem;
+  }
+  .workflow-step {
+    padding-bottom: 1rem;
+  }
+  .workflow-note {
+    margin-top: 1rem;
+  }
+  .site-footer {
+    padding-block: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

@@ -2,6 +2,8 @@
 
 **Theme Proof — automatic pull request previews for Shopify Liquid themes.**
 
+[Website](https://billynoyes.github.io/Proof/) · [Documentation](https://billynoyes.github.io/Proof/docs/)
+
 Proof is a planned open-source GitHub integration that builds a theme for each pull request, deploys it as a Shopify preview, and maintains one comment with the latest storefront and Theme Editor links.
 
 > **Status:** early implementation. The deployment core and project configuration are under active development; no stable GitHub Action, app, or npm package has been published yet.
@@ -51,6 +53,46 @@ A static JSON file controls only the untrusted build job:
 
 Preview targeting is intentionally not controlled by pull request configuration. A pull request must not be able to redirect a privileged deployment to an existing or live theme. The safe default is a per-PR development context. Future existing-theme or unpublished-theme modes must be configured through trusted workflow or GitHub Environment settings and must verify that the target is not live.
 
+## Theme Access setup
+
+1. Install Shopify's free [Theme Access app](https://apps.shopify.com/theme-access) on the preview store.
+2. Create a dedicated password for Proof and view the emailed password once.
+3. In the GitHub repository, open **Settings → Environments** and create an environment named `theme-preview`.
+4. Add an Environment secret named `SHOPIFY_CLI_THEME_TOKEN` containing the Theme Access password.
+5. Add an Environment variable named `SHOPIFY_FLAG_STORE` containing the full store domain, such as `example.myshopify.com`.
+
+The same setup can be performed with GitHub CLI. The secret command prompts securely for the value:
+
+```sh
+gh secret set --env theme-preview SHOPIFY_CLI_THEME_TOKEN
+gh variable set --env theme-preview SHOPIFY_FLAG_STORE --body example.myshopify.com
+```
+
+The reusable workflow reads the secret and variable only in its privileged deployment and cleanup jobs. The untrusted build job does not receive the environment.
+
+A caller workflow will look like this after the first stable `v1` release:
+
+```yaml
+name: Theme Proof
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    uses: BillyNoyes/Proof/.github/workflows/preview.yml@v1
+    with:
+      config: theme-proof.config.json
+      environment: theme-preview
+```
+
+Fork pull requests do not receive the Environment secret and therefore do not deploy automatically. Delete the password in the Theme Access app to revoke Proof's store access, then remove or replace the GitHub Environment secret.
+
 ## Security model
 
 Untrusted pull request code must never run with Shopify credentials. Proof will separate builds from deployment:
@@ -83,6 +125,10 @@ The first release will provide a reusable GitHub Actions workflow and deployment
 Proof is independently developed and has no Shopify sponsorship or endorsement.
 
 See [PLAN.md](PLAN.md) for the proposed architecture, constraints, milestones, and validation plan. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request and report suspected vulnerabilities through the [security policy](SECURITY.md).
+
+## Website development
+
+The GitHub Pages site lives in [`site/`](site/README.md) and uses Vite, Tailwind CSS, and Alpine.js. Run `pnpm dev:site` to develop it or `pnpm test:site` to check and build both pages. See the site README for browser tests and deployment setup.
 
 ## License
 

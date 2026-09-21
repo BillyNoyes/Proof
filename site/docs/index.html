@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Set up Proof for Shopify theme previews. Connect Theme Access, add the GitHub Actions workflow, and configure your build or use a no-build theme."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="theme-color"
+      content="#ffffff"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#000000"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta property="og:title" content="Proof documentation" />
+    <meta
+      property="og:description"
+      content="Theme Access, GitHub Actions, and project configuration for Shopify theme previews."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Proof" />
+    <meta
+      property="og:url"
+      content="https://billynoyes.github.io/Proof/docs/"
+    />
+    <meta name="twitter:card" content="summary" />
+    <link rel="canonical" href="https://billynoyes.github.io/Proof/docs/" />
+    <link rel="icon" href="%BASE_URL%proof.svg" type="image/svg+xml" />
+    <link
+      rel="preload"
+      href="%BASE_URL%fonts/inter_n4.b2a3f24c19b4de56e8871f609e73ca7f6d2e2bb9.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="%BASE_URL%fonts/inter_n7.02711e6b374660cfc7915d1afc1c204e633421e4.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+    <script type="module" src="/src/main.ts"></script>
+    <title>Proof documentation</title>
+  </head>
+  <body x-data="docsNavigation($el)">
+    <div class="site-shell">
+      <a class="skip-link" href="#main">Skip to content</a>
+      <header class="site-header">
+        <a class="wordmark" href="%BASE_URL%" aria-label="Proof home"
+          ><img src="%BASE_URL%proof.svg" alt="" width="28" height="28" /><span
+            >Proof</span
+          ></a
+        >
+        <nav class="primary-nav" aria-label="Primary navigation">
+          <a href="%BASE_URL%docs/" aria-current="page">Docs</a
+          ><a href="https://github.com/BillyNoyes/Proof"
+            >GitHub <span aria-hidden="true">↗</span></a
+          >
+        </nav>
+      </header>
+      <div class="docs-layout">
+        <aside class="docs-sidebar">
+          <p class="text-[13px]/5 muted">Documentation</p>
+          <nav class="docs-nav" aria-label="Documentation sections">
+            <a
+              href="#getting-started"
+              :aria-current="activeSection === 'getting-started' ? 'location' : null"
+              @click="navigate"
+              >Getting started</a
+            >
+            <a
+              href="#theme-access"
+              :aria-current="activeSection === 'theme-access' ? 'location' : null"
+              @click="navigate"
+              >Theme Access</a
+            >
+            <a
+              href="#workflow"
+              :aria-current="activeSection === 'workflow' ? 'location' : null"
+              @click="navigate"
+              >GitHub workflow</a
+            >
+            <a
+              href="#configuration"
+              :aria-current="activeSection === 'configuration' ? 'location' : null"
+              @click="navigate"
+              >Build configuration</a
+            >
+            <a
+              href="#previews"
+              :aria-current="activeSection === 'previews' ? 'location' : null"
+              @click="navigate"
+              >Preview lifecycle</a
+            >
+            <a
+              href="#security"
+              :aria-current="activeSection === 'security' ? 'location' : null"
+              @click="navigate"
+              >Security model</a
+            >
+            <a
+              href="#troubleshooting"
+              :aria-current="activeSection === 'troubleshooting' ? 'location' : null"
+              @click="navigate"
+              >Troubleshooting</a
+            >
+            <a
+              href="#release-status"
+              :aria-current="activeSection === 'release-status' ? 'location' : null"
+              @click="navigate"
+              >Release status</a
+            >
+          </nav>
+        </aside>
+        <main class="docs-main" id="main" tabindex="-1">
+          <div class="docs-intro">
+            <h1>Proof documentation</h1>
+            <p>
+              Bring your theme, your build, and a preview store. Proof connects
+              them through GitHub Actions.
+            </p>
+          </div>
+          <details class="mobile-nav" @keydown.escape.stop="closeMenu">
+            <summary>On this page</summary>
+            <nav class="docs-nav" aria-label="Mobile documentation sections">
+              <a href="#getting-started" @click="navigate">Getting started</a>
+              <a href="#theme-access" @click="navigate">Theme Access</a>
+              <a href="#workflow" @click="navigate">GitHub workflow</a>
+              <a href="#configuration" @click="navigate">Build configuration</a>
+              <a href="#previews" @click="navigate">Preview lifecycle</a>
+              <a href="#security" @click="navigate">Security model</a>
+              <a href="#troubleshooting" @click="navigate">Troubleshooting</a>
+              <a href="#release-status" @click="navigate">Release status</a>
+            </nav>
+          </details>
+          <section
+            class="docs-section"
+            id="getting-started"
+            tabindex="-1"
+            aria-labelledby="getting-started-title"
+          >
+            <h2 id="getting-started-title">Getting started</h2>
+            <p class="notice">
+              <strong>Pre-release software.</strong> The Action is not published
+              on Marketplace yet. Store-backed end-to-end validation is still
+              required. Use a dedicated development store for experiments, not a
+              production store.
+            </p>
+            <p>
+              Proof builds pull request code in one job, then deploys the
+              resulting theme files in a separate job. The deployment updates a
+              PR comment with storefront and Theme Editor links.
+            </p>
+            <p>
+              You will need a Shopify theme in a GitHub repository, GitHub
+              Actions enabled, and permission to manage repository environments.
+              Your GitHub plan must support environments for the repository’s
+              visibility.
+            </p>
+            <ol>
+              <li>
+                <a href="#theme-access">Create a Theme Access credential</a> and
+                save it in GitHub.
+              </li>
+              <li>
+                <a href="#workflow">Add the reusable workflow</a> to your
+                repository.
+              </li>
+              <li>
+                <a href="#configuration">Configure a build</a>, or skip this
+                step for a theme at the repository root that needs no build.
+              </li>
+            </ol>
+          </section>
+          <section
+            class="docs-section"
+            id="theme-access"
+            tabindex="-1"
+            aria-labelledby="theme-access-title"
+          >
+            <h2 id="theme-access-title">Connect Theme Access</h2>
+            <p>
+              Use a dedicated password from Shopify’s free
+              <a href="https://apps.shopify.com/theme-access"
+                >Theme Access app</a
+              >. This is not your Shopify login password or the storefront
+              password.
+            </p>
+            <ol>
+              <li>Install Theme Access on your preview store.</li>
+              <li>
+                Select <strong>Create theme password</strong> and enter the
+                recipient’s details. Use a dedicated credential for Proof.
+              </li>
+              <li>
+                Open the emailed link and copy the password. It can only be
+                viewed once; the link expires after seven days or after viewing.
+              </li>
+              <li>
+                In your GitHub repository, open
+                <strong>Settings → Environments → New environment</strong>. Name
+                it <code>theme-preview</code>.
+              </li>
+              <li>
+                Add the following secret and variable to that environment.
+              </li>
+            </ol>
+            <div
+              class="table-wrap"
+              tabindex="0"
+              role="region"
+              aria-label="GitHub environment settings"
+            >
+              <table class="docs-table">
+                <caption>
+                  Environment: theme-preview
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row"><code>SHOPIFY_CLI_THEME_TOKEN</code></th>
+                    <td>Secret</td>
+                    <td>Your Theme Access password</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><code>SHOPIFY_FLAG_STORE</code></th>
+                    <td>Variable</td>
+                    <td><code>example.myshopify.com</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              The store domain is not sensitive. The password is. Never put it
+              in your repository, configuration file, or workflow YAML. Theme
+              Access can modify store themes; treat it as a privileged
+              credential.
+            </p>
+            <h3>Prefer the GitHub CLI?</h3>
+            <p>
+              After creating the environment, run these commands from your theme
+              repository. The first command prompts for the secret instead of
+              putting it in your shell history.
+            </p>
+            <div class="code-block" x-data="copyCode($el)">
+              <div class="code-header">
+                <span data-code-label id="secret-code">Terminal</span
+                ><button
+                  x-cloak
+                  type="button"
+                  @click="copy"
+                  :disabled="pending"
+                  :aria-label="`Copy ${label}`"
+                >
+                  Copy
+                </button>
+              </div>
+              <pre
+                tabindex="0"
+                role="region"
+                aria-labelledby="secret-code"
+              ><code>gh secret set --env theme-preview SHOPIFY_CLI_THEME_TOKEN
+gh variable set --env theme-preview SHOPIFY_FLAG_STORE --body example.myshopify.com</code></pre>
+              <p class="copy-status" role="status" x-text="status"></p>
+            </div>
+            <p>
+              Only deployment and cleanup jobs use this environment. You do not
+              need to forward secrets in the caller workflow or use
+              <code>secrets: inherit</code>. Required reviewers can add an
+              approval step to both deployment and cleanup.
+            </p>
+            <p>
+              To revoke access, delete the password in Theme Access. To rotate
+              it, create a new password and replace the GitHub environment
+              secret. See
+              <a
+                href="https://shopify.dev/docs/storefronts/themes/tools/theme-access"
+                >Shopify’s Theme Access guide</a
+              >.
+            </p>
+          </section>
+          <section
+            class="docs-section"
+            id="workflow"
+            tabindex="-1"
+            aria-labelledby="workflow-title"
+          >
+            <h2 id="workflow-title">Add the GitHub workflow</h2>
+            <p>
+              Create <code>.github/workflows/theme-proof.yml</code> in your
+              theme repository. The reusable workflow supplies the separate
+              build, deploy, and cleanup jobs.
+            </p>
+            <p class="notice">
+              This experimental example uses <code>@main</code>, which can
+              change. There is no <code>v1</code> release yet. Proof’s internal
+              Action references also use <code>@main</code>; pinning only this
+              caller does not pin the entire dependency chain. Do not treat this
+              example as a production release.
+            </p>
+            <div class="code-block" x-data="copyCode($el)">
+              <div class="code-header">
+                <span data-code-label id="workflow-code"
+                  >.github/workflows/theme-proof.yml</span
+                ><button
+                  x-cloak
+                  type="button"
+                  @click="copy"
+                  :disabled="pending"
+                  :aria-label="`Copy ${label}`"
+                >
+                  Copy
+                </button>
+              </div>
+              <pre
+                tabindex="0"
+                role="region"
+                aria-labelledby="workflow-code"
+              ><code>name: Theme Proof
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    uses: BillyNoyes/Proof/.github/workflows/preview.yml@main
+    with:
+      config: theme-proof.config.json
+      environment: theme-preview</code></pre>
+              <p class="copy-status" role="status" x-text="status"></p>
+            </div>
+            <p>
+              The condition skips fork pull requests. Keep it in place. Do not
+              replace <code>pull_request</code> with
+              <code>pull_request_target</code> to obtain secrets for untrusted
+              code.
+            </p>
+            <div
+              class="table-wrap"
+              tabindex="0"
+              role="region"
+              aria-label="Reusable workflow inputs"
+            >
+              <table class="docs-table">
+                <caption>
+                  Reusable workflow inputs
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Input</th>
+                    <th scope="col">Default</th>
+                    <th scope="col">Purpose</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row"><code>config</code></th>
+                    <td><code>theme-proof.config.json</code></td>
+                    <td>Build config path, relative to the repository root</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><code>environment</code></th>
+                    <td><code>theme-preview</code></td>
+                    <td>GitHub environment holding the credential</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><code>target-mode</code></th>
+                    <td><code>development-context</code></td>
+                    <td>The only supported target mode</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><code>shopify-cli-version</code></th>
+                    <td><code>4.8.0</code></td>
+                    <td>Pinned CLI version for deployment and cleanup</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              The workflow currently uses Node.js 24 on Ubuntu.
+              <code>pull-requests: write</code> is needed to create and update
+              the preview comment.
+            </p>
+          </section>
+          <section
+            class="docs-section"
+            id="configuration"
+            tabindex="-1"
+            aria-labelledby="configuration-title"
+          >
+            <h2 id="configuration-title">Configure your build</h2>
+            <p>
+              Add <code>theme-proof.config.json</code> to your repository. It is
+              static JSON, not executable configuration. Optional setup,
+              install, and build commands run in that order.
+            </p>
+            <h3>No build, including Dawn</h3>
+            <p>
+              If the theme is at the repository root and needs no build,
+              <strong>no config file is required</strong>. The explicit
+              equivalent is:
+            </p>
+            <div class="code-block" x-data="copyCode($el)">
+              <div class="code-header">
+                <span data-code-label id="no-build-code"
+                  >theme-proof.config.json · No build</span
+                ><button
+                  x-cloak
+                  type="button"
+                  @click="copy"
+                  :disabled="pending"
+                  :aria-label="`Copy ${label}`"
+                >
+                  Copy
+                </button>
+              </div>
+              <pre
+                tabindex="0"
+                role="region"
+                aria-labelledby="no-build-code"
+              ><code>{
+  "version": 1,
+  "build": {
+    "themeDirectory": "."
+  }
+}</code></pre>
+              <p class="copy-status" role="status" x-text="status"></p>
+            </div>
+            <h3>A theme with a build step</h3>
+            <p>
+              Specify your package manager and commands. Proof does not need to
+              know whether you use Easel, Vite, or another tool. Point
+              <code>themeDirectory</code> at the complete deployable theme, not
+              just a folder of compiled assets.
+            </p>
+            <div class="code-block" x-data="copyCode($el)">
+              <div class="code-header">
+                <span data-code-label id="build-code"
+                  >theme-proof.config.json · Custom build</span
+                ><button
+                  x-cloak
+                  type="button"
+                  @click="copy"
+                  :disabled="pending"
+                  :aria-label="`Copy ${label}`"
+                >
+                  Copy
+                </button>
+              </div>
+              <pre
+                tabindex="0"
+                role="region"
+                aria-labelledby="build-code"
+              ><code>{
+  "$schema": "https://raw.githubusercontent.com/BillyNoyes/Proof/main/schema/theme-proof.schema.json",
+  "version": 1,
+  "build": {
+    "workingDirectory": ".",
+    "setup": "npm install --global pnpm@10.28.0",
+    "install": "pnpm install --frozen-lockfile",
+    "command": "pnpm build",
+    "themeDirectory": "."
+  }
+}</code></pre>
+              <p class="copy-status" role="status" x-text="status"></p>
+            </div>
+            <h3>Nested themes and output directories</h3>
+            <p>
+              Both directory paths are relative to the
+              <strong>repository root</strong>. For example, a project in
+              <code>themes/storefront</code> that writes a complete theme to its
+              <code>dist</code> directory would use:
+            </p>
+            <div class="code-block" x-data="copyCode($el)">
+              <div class="code-header">
+                <span data-code-label id="nested-code"
+                  >theme-proof.config.json · Nested project</span
+                ><button
+                  x-cloak
+                  type="button"
+                  @click="copy"
+                  :disabled="pending"
+                  :aria-label="`Copy ${label}`"
+                >
+                  Copy
+                </button>
+              </div>
+              <pre
+                tabindex="0"
+                role="region"
+                aria-labelledby="nested-code"
+              ><code>{
+  "version": 1,
+  "build": {
+    "workingDirectory": "themes/storefront",
+    "install": "npm ci",
+    "command": "npm run build",
+    "themeDirectory": "themes/storefront/dist"
+  }
+}</code></pre>
+              <p class="copy-status" role="status" x-text="status"></p>
+            </div>
+            <p>
+              Directory defaults are <code>.</code>; commands are omitted by
+              default. Each command has a 15-minute timeout. Absolute paths,
+              paths outside the workspace, unknown properties, and unsupported
+              config versions are rejected.
+            </p>
+            <p>
+              A missing default config uses the no-build defaults. A missing
+              custom config path is an error. Use the
+              <a
+                href="https://github.com/BillyNoyes/Proof/blob/main/schema/theme-proof.schema.json"
+                >JSON Schema</a
+              >
+              for editor validation.
+            </p>
+          </section>
+          <section
+            class="docs-section"
+            id="previews"
+            tabindex="-1"
+            aria-labelledby="previews-title"
+          >
+            <h2 id="previews-title">The preview lifecycle</h2>
+            <p>
+              The current implementation uses a Shopify development context
+              derived from the repository ID and PR number. Subsequent commits
+              use the same context, rather than intentionally creating a new
+              theme for each commit.
+            </p>
+            <ul>
+              <li>
+                <strong>Open or update:</strong> build, stage, validate, then
+                push with Shopify CLI’s strict validation.
+              </li>
+              <li>
+                <strong>Review:</strong> update one comment with the storefront
+                and Theme Editor links.
+              </li>
+              <li>
+                <strong>Close or merge:</strong> run cleanup and update the
+                comment.
+              </li>
+            </ul>
+            <p>
+              New runs cancel older runs for the same PR. Development themes are
+              temporary, not permanent staging environments. Context reuse, URL
+              behavior on password-protected stores, and cleanup of expired or
+              manually deleted themes still need store-backed verification.
+            </p>
+            <p>
+              <strong
+                >Existing-theme selection and new unpublished-theme creation are
+                not implemented.</strong
+              >
+              Only <code>development-context</code> is accepted. Live themes are
+              rejected as preview targets.
+            </p>
+          </section>
+          <section
+            class="docs-section"
+            id="security"
+            tabindex="-1"
+            aria-labelledby="security-title"
+          >
+            <h2 id="security-title">Build code is not deployment code</h2>
+            <p>
+              The security boundary is the separation between jobs. Filtering
+              environment variables is a precaution, not a sandbox for arbitrary
+              PR code.
+            </p>
+            <ul>
+              <li>
+                The build job runs repository commands without the Shopify
+                environment.
+              </li>
+              <li>
+                Only theme directories are staged: <code>assets</code>,
+                <code>blocks</code>, <code>config</code>, <code>layout</code>,
+                <code>locales</code>, <code>sections</code>,
+                <code>snippets</code>, and <code>templates</code>.
+              </li>
+              <li>
+                The deployment job validates the artifact again and does not run
+                repository build scripts.
+              </li>
+              <li>
+                Artifacts must include <code>layout/theme.liquid</code>.
+                Symlinks and unsupported file types are rejected.
+              </li>
+              <li>
+                Default limits are 5,000 files, 10 MiB per file, and 100 MiB
+                total.
+              </li>
+            </ul>
+            <p>
+              Store credentials and deployment targets do not belong in
+              PR-controlled build configuration. Protect workflow changes and
+              configure GitHub environment approvals where appropriate. Do not
+              use a persistent self-hosted runner for untrusted builds.
+            </p>
+            <p>
+              Report suspected vulnerabilities privately through the
+              repository’s
+              <a href="https://github.com/BillyNoyes/Proof/security/policy"
+                >security policy</a
+              >.
+            </p>
+          </section>
+          <section
+            class="docs-section"
+            id="troubleshooting"
+            tabindex="-1"
+            aria-labelledby="troubleshooting-title"
+          >
+            <h2 id="troubleshooting-title">Troubleshooting</h2>
+            <h3>The deployment cannot find the credential</h3>
+            <p>
+              Check the environment name, then confirm
+              <code>SHOPIFY_CLI_THEME_TOKEN</code> is an environment
+              <strong>secret</strong> and <code>SHOPIFY_FLAG_STORE</code> is an
+              environment <strong>variable</strong>. Required reviewers and
+              deployment restrictions can hold or block the job. Fork PRs are
+              not supported for automatic deployment.
+            </p>
+            <h3>The theme artifact is invalid</h3>
+            <p>
+              Check that <code>themeDirectory</code> contains the full theme,
+              including <code>layout/theme.liquid</code>. A Vite assets-only
+              output directory is not a deployable theme. Remove symlinks and
+              inspect the reported file-size or file-count limit.
+            </p>
+            <h3>The build command cannot be found</h3>
+            <p>
+              Install the required tool in <code>build.setup</code>. The
+              workflow provides Node.js, but does not infer or install your
+              project’s package manager or dependencies.
+            </p>
+            <h3>The PR comment cannot be updated</h3>
+            <p>
+              Confirm that the caller grants
+              <code>pull-requests: write</code> and that repository or
+              organization policy allows it. Do not work around token
+              restrictions by exposing a privileged token to the build.
+            </p>
+            <h3>A preview remains after the PR closes</h3>
+            <p>
+              Check the cleanup job for pending environment approval or a failed
+              run. Retry the failed job after resolving the cause. If manual
+              removal is necessary, verify the store and theme identity before
+              deleting anything.
+            </p>
+            <p>
+              Still stuck?
+              <a href="https://github.com/BillyNoyes/Proof/issues/new/choose"
+                >Open an issue</a
+              >
+              with the failing step and sanitized logs. Never include a password
+              or token.
+            </p>
+          </section>
+          <section
+            class="docs-section"
+            id="release-status"
+            tabindex="-1"
+            aria-labelledby="release-status-title"
+          >
+            <h2 id="release-status-title">Before the first release</h2>
+            <p>
+              Proof is an open-source, pre-release GitHub Action. Build
+              configuration, artifact validation, deployment, comments, and
+              cleanup have an implementation and automated tests. There is no
+              stable tag or Marketplace listing yet.
+            </p>
+            <p>
+              The next release gate is an end-to-end test against a dedicated
+              development store, followed by versioned Action references and a
+              Marketplace release. Existing and unpublished theme modes remain
+              future work.
+            </p>
+            <p>
+              <a href="https://github.com/BillyNoyes/Proof/blob/main/PLAN.md"
+                >Read the implementation plan</a
+              >,
+              <a href="https://github.com/BillyNoyes/Proof/releases"
+                >check releases</a
+              >, or
+              <a
+                href="https://github.com/BillyNoyes/Proof/blob/main/CONTRIBUTING.md"
+                >contribute on GitHub</a
+              >.
+            </p>
+          </section>
+        </main>
+      </div>
+      <footer class="site-footer">
+        <span>Open source. MIT licensed.</span
+        ><span
+          >Built by <a href="https://billynoyes.co.uk/">Billy Noyes</a>.
+          Independent of Shopify.</span
+        >
+      </footer>
+    </div>
+  </body>
+</html>
