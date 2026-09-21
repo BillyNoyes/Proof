@@ -13,4 +13,4 @@ outputs:
     description: Total bytes in the theme artifact
 runs:
   using: node24
-  main: ../../dist/build-action.js
+  main: ../../dist/build-action.cjs
