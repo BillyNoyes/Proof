@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "build": {
+    "themeDirectory": "test/fixtures/theme"
+  }
+}
