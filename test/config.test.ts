@@ -48,6 +48,26 @@ describe('action configuration', () => {
     expect(() => parseBoolean('yes', 'strict')).toThrow('true or false');
   });
 
+  it('rejects fork pull requests even with a privileged token', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'theme-proof-fork-'));
+    roots.push(root);
+    const path = join(root, 'event.json');
+    await writeFile(
+      path,
+      JSON.stringify({
+        repository: {
+          id: 123,
+          full_name: 'owner/theme',
+          owner: {login: 'owner'},
+        },
+        pull_request: {number: 42, head: {sha: 'abc123', repo: {id: 999}}},
+      }),
+    );
+    await expect(readRepositoryContext(path, '')).rejects.toThrow(
+      'fork pull requests',
+    );
+  });
+
   it('reads and verifies pull request identity', async () => {
     const root = await mkdtemp(join(tmpdir(), 'theme-proof-event-'));
     roots.push(root);
@@ -60,7 +80,7 @@ describe('action configuration', () => {
           full_name: 'BillyNoyes/Proof',
           owner: {login: 'BillyNoyes'},
         },
-        pull_request: {number: 42, head: {sha: 'abc123'}},
+        pull_request: {number: 42, head: {sha: 'abc123', repo: {id: 123}}},
       }),
     );
     await expect(readRepositoryContext(path, '42')).resolves.toEqual({

@@ -31,6 +31,19 @@ export class GitHubClient {
     this.#fetch = fetcher;
   }
 
+  async currentPullRequest(): Promise<{state: 'open' | 'closed'; sha: string}> {
+    const pull = await this.#request<{state: string; head: {sha: string}}>(
+      `/repos/${this.#context.fullName}/pulls/${this.#context.pullRequest}`,
+    );
+    if (
+      !['open', 'closed'].includes(pull.state) ||
+      typeof pull.head?.sha !== 'string'
+    ) {
+      throw new Error('GitHub API returned invalid pull request state');
+    }
+    return {state: pull.state as 'open' | 'closed', sha: pull.head.sha};
+  }
+
   async findProofComment(): Promise<
     {comment: IssueComment; state: PreviewState} | undefined
   > {
@@ -41,7 +54,13 @@ export class GitHubClient {
       for (const comment of comments) {
         if (comment.user.login !== this.#commentAuthor) continue;
         const state = readPreviewState(comment.body);
-        if (state) return {comment, state};
+        if (
+          state &&
+          state.repository === this.#context.fullName &&
+          state.pullRequest === this.#context.pullRequest
+        ) {
+          return {comment, state};
+        }
       }
       if (comments.length < 100) return undefined;
     }
@@ -71,6 +90,7 @@ export class GitHubClient {
   ): Promise<T> {
     const response = await this.#fetch(`https://api.github.com${path}`, {
       ...init,
+      signal: AbortSignal.timeout(30_000),
       headers: {
         Accept: 'application/vnd.github+json',
         Authorization: `Bearer ${this.#token}`,

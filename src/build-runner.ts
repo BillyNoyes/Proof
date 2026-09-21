@@ -1,4 +1,5 @@
 import {spawn} from 'node:child_process';
+import {stopProcessTree} from './process.js';
 
 export interface BuildCommandResult {
   code: number;
@@ -48,11 +49,12 @@ export const runShellCommand: BuildCommandRunner = (command, options) =>
       cwd: options.cwd,
       env: options.env,
       shell: true,
+      detached: process.platform !== 'win32',
       stdio: 'inherit',
     });
     child.once('error', reject);
     const timeout = setTimeout(() => {
-      child.kill();
+      stopProcessTree(child);
       reject(new Error('build command timed out'));
     }, options.timeoutMs);
     timeout.unref();

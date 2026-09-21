@@ -9,7 +9,7 @@ pnpm install --frozen-lockfile
 pnpm check
 ```
 
-Use Node.js 22.12 or newer. The committed `dist` output must match the TypeScript source.
+Use Node.js 22.12 or newer. The committed `dist` output and generated `THIRD_PARTY_NOTICES.md` must match the TypeScript source and bundled dependencies. `pnpm build` regenerates both.
 
 ## Safety requirements
 

@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import {join} from 'node:path';
 import {prepareThemeArtifact} from './artifact.js';
 import {runConfiguredBuild} from './build-runner.js';
-import {loadProjectConfig} from './project-config.js';
+import {assertWorkspacePath, loadProjectConfig} from './project-config.js';
 
 async function run(): Promise<void> {
   const workspace = process.env.GITHUB_WORKSPACE;
@@ -18,7 +18,9 @@ async function run(): Promise<void> {
       'No Theme Proof config found; using a no-build theme at the repository root.',
     );
   }
+  await assertWorkspacePath(workspace, config.workingDirectory);
   await runConfiguredBuild(config);
+  await assertWorkspacePath(workspace, config.themeDirectory);
   const runnerTemp = process.env.RUNNER_TEMP;
   if (!runnerTemp) throw new Error('RUNNER_TEMP is required');
   const artifact = await prepareThemeArtifact(

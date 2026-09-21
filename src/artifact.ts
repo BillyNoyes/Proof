@@ -1,12 +1,4 @@
-import {
-  access,
-  copyFile,
-  lstat,
-  mkdir,
-  readdir,
-  realpath,
-  rm,
-} from 'node:fs/promises';
+import {copyFile, lstat, mkdir, readdir, realpath, rm} from 'node:fs/promises';
 import {constants} from 'node:fs';
 import {join, relative, resolve, sep} from 'node:path';
 import type {ArtifactSummary} from './types.js';
@@ -72,7 +64,7 @@ export async function prepareThemeArtifact(
       limits,
     );
   }
-  await access(join(destination, 'layout', 'theme.liquid'));
+  await requireLayout(destination);
   if (summary.files === 0) throw new Error('theme artifact contains no files');
   return summary;
 }
@@ -91,7 +83,7 @@ export async function validateThemeArtifact(
       );
     }
   }
-  await access(join(root, 'layout', 'theme.liquid'));
+  await requireLayout(root);
   const summary: ArtifactSummary = {root, files: 0, bytes: 0};
   for (const entry of topLevel) {
     await inspectDirectory(join(root, entry.name), root, summary, limits);
@@ -169,6 +161,13 @@ function inspectFile(
   }
   if (summary.bytes > limits.maxTotalBytes) {
     throw new Error('theme artifact exceeds the total size limit');
+  }
+}
+
+async function requireLayout(root: string): Promise<void> {
+  const layout = await lstat(join(root, 'layout', 'theme.liquid'));
+  if (!layout.isFile() || layout.isSymbolicLink()) {
+    throw new Error('layout/theme.liquid must be a regular file');
   }
 }
 

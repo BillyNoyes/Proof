@@ -92,4 +92,4 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
-      - run: git diff --exit-code -- dist
+      - run: git diff --exit-code -- dist THIRD_PARTY_NOTICES.md

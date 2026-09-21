@@ -29,7 +29,7 @@ GitHub Action references always include the repository owner. A future release w
 5. Create or update one pull request comment with preview links and checks.
 6. Delete the preview when the pull request closes.
 
-Proof will use Shopify-supported primitives including Theme Access credentials, `shopify theme push --development-context`, machine-readable `--json` output, strict Theme Check validation, and non-interactive theme deletion.
+Proof will use Shopify-supported primitives including Theme Access credentials, `shopify theme push --development --development-context`, machine-readable `--json` output, strict Theme Check validation, and non-interactive theme deletion.
 
 ## Project configuration
 
@@ -70,7 +70,7 @@ gh variable set --env theme-preview SHOPIFY_FLAG_STORE --body example.myshopify.
 
 The reusable workflow reads the secret and variable only in its privileged deployment and cleanup jobs. The untrusted build job does not receive the environment.
 
-A caller workflow will look like this after the first stable `v1` release:
+For development-store experiments, add this caller workflow. `@main` is not a stable release; use a reviewed commit SHA when validating a release candidate. See [RELEASING.md](RELEASING.md) for the required store-backed checks and Marketplace publication steps.
 
 ```yaml
 name: Theme Proof
@@ -85,7 +85,8 @@ permissions:
 
 jobs:
   preview:
-    uses: BillyNoyes/Proof/.github/workflows/preview.yml@v1
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    uses: BillyNoyes/Proof/.github/workflows/preview.yml@main
     with:
       config: theme-proof.config.json
       environment: theme-preview
@@ -97,10 +98,12 @@ Fork pull requests do not receive the Environment secret and therefore do not de
 
 Untrusted pull request code must never run with Shopify credentials. Proof will separate builds from deployment:
 
-- The build job has no Shopify secret and produces an artifact.
+- The build job has only `contents: read`, no Shopify environment, and checks out the PR head SHA before producing an artifact.
 - The deployment job does not execute repository scripts. It accepts only validated theme files and holds the Theme Access credential.
 - Fork pull requests do not deploy automatically.
-- Live themes are never valid preview targets.
+- Live themes are never valid preview targets. Cleanup verifies the current role and context before deleting and confirms that the theme is gone.
+- Deployment and cleanup are serialized without canceling a running mutation. Current PR state is checked to skip stale deploys and cleanup for reopened PRs.
+- Inherited Shopify CLI flags are removed so they cannot enable publishing or change the target.
 
 ## Current implementation
 
@@ -116,7 +119,7 @@ The repository now contains an early TypeScript implementation of:
 - pull request comment state, updates, and cleanup;
 - a reusable workflow with separate build, deployment, and cleanup jobs.
 
-This is not a stable release yet. The next required milestone is a store-backed integration test on a dedicated development store, followed by replacing `@main` references with immutable release tags.
+This is not a stable release yet. The next required milestone is a store-backed integration test on a dedicated development store. See [REVIEW.md](REVIEW.md) for review results and remaining release gates. Cross-platform tests cover the code and build Action; the supported deployment workflow uses GitHub-hosted Ubuntu with Node.js 24 and Shopify CLI 4.8.0.
 
 ## Scope
 

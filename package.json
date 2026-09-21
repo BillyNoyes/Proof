@@ -26,7 +26,7 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "build": "tsup && node scripts/check-dist.mjs",
+    "build": "tsup && node scripts/license-notices.mjs && node scripts/check-dist.mjs",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:site",
     "dev:site": "pnpm --filter proof-site dev",
     "build:site": "pnpm --filter proof-site build",
@@ -49,7 +49,8 @@
     "tsup": "8.5.1",
     "typescript": "5.9.3",
     "typescript-eslint": "8.70.0",
-    "vitest": "4.1.11"
+    "vitest": "4.1.11",
+    "yaml": "2.8.3"
   },
   "packageManager": "pnpm@10.28.0"
 }

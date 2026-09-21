@@ -56,6 +56,43 @@ describe('Shopify CLI integration', () => {
     ).toThrow('mismatched Theme Editor URL');
   });
 
+  it('accepts strict-push Theme Check output before the preview document', () => {
+    expect(parseThemePreview(`[]\n${output}\n`, store).id).toBe('123456789');
+    expect(
+      parseThemePreview(
+        `${JSON.stringify([{errorCount: 0, offenses: [{severity: 'warning'}]}])}\n${output}`,
+        store,
+      ).id,
+    ).toBe('123456789');
+    expect(() =>
+      parseThemePreview(`[ {"errorCount": 1} ]\n${output}`, store),
+    ).toThrow();
+    expect(() => parseThemePreview(`unexpected\n${output}`, store)).toThrow();
+  });
+
+  it.each([
+    {warning: 'partial upload'},
+    {errors: {'assets/theme.css': ['invalid']}},
+  ])('fails partial uploads even with exit zero: %j', (failure) => {
+    const value = JSON.parse(output) as {theme: Record<string, unknown>};
+    Object.assign(value.theme, failure);
+    expect(() => parseThemePreview(JSON.stringify(value), store)).toThrow(
+      'upload errors',
+    );
+  });
+
+  it.each([
+    '/themes/123456789/editor-extra',
+    '/themes/123456789/editor/elsewhere',
+  ])('rejects misleading editor paths %s', (path) => {
+    expect(() =>
+      parseThemePreview(
+        output.replace('/themes/123456789/editor', path),
+        store,
+      ),
+    ).toThrow();
+  });
+
   it('passes credentials through the environment, never arguments', async () => {
     const runner = vi.fn<CommandRunner>((_command, args, options) => {
       expect(args).not.toContain('secret-password');
@@ -87,6 +124,7 @@ describe('Shopify CLI integration', () => {
         'push',
         '--path',
         '/theme',
+        '--development',
         '--development-context',
         'proof-123-42',
         '--json',
@@ -109,7 +147,7 @@ describe('Shopify CLI integration', () => {
       password: 'secret',
       runner: oldRunner,
     });
-    await expect(old.verifyVersion()).rejects.toThrow('4.6.1 or newer');
+    await expect(old.verifyVersion()).rejects.toThrow('4.8.0 or newer');
 
     const failedRunner: CommandRunner = () =>
       Promise.resolve({

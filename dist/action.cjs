@@ -6,7 +6,11 @@ var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __commonJS = (cb, mod) => function __require() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -19463,100 +19467,9 @@ function info(message) {
 // src/action.ts
 var import_node_path2 = require("path");
 
-// src/artifact.ts
-var import_promises = require("fs/promises");
-var import_node_fs = require("fs");
-var import_node_path = require("path");
-var allowedDirectories = /* @__PURE__ */ new Set([
-  "assets",
-  "blocks",
-  "config",
-  "layout",
-  "locales",
-  "sections",
-  "snippets",
-  "templates"
-]);
-var defaultArtifactLimits = {
-  maxFiles: 5e3,
-  maxFileBytes: 10 * 1024 * 1024,
-  maxTotalBytes: 100 * 1024 * 1024
-};
-async function validateThemeArtifact(configuredRoot, limits = defaultArtifactLimits) {
-  assertLimits(limits);
-  const root = await realDirectory(configuredRoot, "theme-path");
-  const topLevel = await (0, import_promises.readdir)(root, { withFileTypes: true });
-  for (const entry of topLevel) {
-    if (!entry.isDirectory() || !allowedDirectories.has(entry.name)) {
-      throw new Error(
-        `theme artifact contains unsupported top-level entry: ${entry.name}`
-      );
-    }
-  }
-  await (0, import_promises.access)((0, import_node_path.join)(root, "layout", "theme.liquid"));
-  const summary2 = { root, files: 0, bytes: 0 };
-  for (const entry of topLevel) {
-    await inspectDirectory((0, import_node_path.join)(root, entry.name), root, summary2, limits);
-  }
-  if (summary2.files === 0) throw new Error("theme artifact contains no files");
-  return summary2;
-}
-async function inspectDirectory(directory, root, summary2, limits) {
-  const entries = await (0, import_promises.readdir)(directory, { withFileTypes: true });
-  for (const entry of entries) {
-    const path = (0, import_node_path.join)(directory, entry.name);
-    const metadata = await (0, import_promises.lstat)(path);
-    const name = portablePath(root, path);
-    if (metadata.isSymbolicLink()) {
-      throw new Error(`theme artifact cannot contain symbolic links: ${name}`);
-    }
-    if (metadata.isDirectory()) {
-      await inspectDirectory(path, root, summary2, limits);
-      continue;
-    }
-    inspectFile(metadata, name, summary2, limits);
-  }
-}
-function inspectFile(metadata, name, summary2, limits) {
-  if (!metadata.isFile()) {
-    throw new Error(
-      `theme artifact contains an unsupported file type: ${name}`
-    );
-  }
-  summary2.files += 1;
-  summary2.bytes += metadata.size;
-  if (summary2.files > limits.maxFiles) {
-    throw new Error(`theme artifact exceeds the ${limits.maxFiles} file limit`);
-  }
-  if (metadata.size > limits.maxFileBytes) {
-    throw new Error(`theme artifact file exceeds the size limit: ${name}`);
-  }
-  if (summary2.bytes > limits.maxTotalBytes) {
-    throw new Error("theme artifact exceeds the total size limit");
-  }
-}
-async function realDirectory(path, name) {
-  const unresolved = (0, import_node_path.resolve)(path);
-  const metadata = await (0, import_promises.lstat)(unresolved);
-  if (metadata.isSymbolicLink() || !metadata.isDirectory()) {
-    throw new Error(`${name} must be a real directory, not a symbolic link`);
-  }
-  return (0, import_promises.realpath)(unresolved);
-}
-function portablePath(root, path) {
-  return (0, import_node_path.relative)(root, path).split(import_node_path.sep).join("/");
-}
-function assertLimits(limits) {
-  for (const [name, value] of Object.entries(limits)) {
-    if (!Number.isSafeInteger(value) || value <= 0) {
-      throw new Error(`${name} must be a positive integer`);
-    }
-  }
-}
-
 // src/config.ts
 var import_node_crypto = require("crypto");
-var import_promises2 = require("fs/promises");
+var import_promises = require("fs/promises");
 var contextPattern = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 var storePattern = /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/;
 function normalizeStore(value) {
@@ -19580,12 +19493,16 @@ function parseBoolean(value, name) {
   throw new Error(`${name} must be true or false`);
 }
 async function readRepositoryContext(eventPath, pullRequestInput) {
-  const value = JSON.parse(await (0, import_promises2.readFile)(eventPath, "utf8"));
+  const value = JSON.parse(await (0, import_promises.readFile)(eventPath, "utf8"));
   const event = object(value, "GitHub event");
   const repository = object(event.repository, "repository");
   const owner = object(repository.owner, "repository.owner");
   const pullRequest = object(event.pull_request, "pull_request");
   const head = object(pullRequest.head, "pull_request.head");
+  const headRepository = object(head.repo, "pull_request.head.repo");
+  if (headRepository.id !== repository.id) {
+    throw new Error("fork pull requests cannot deploy previews");
+  }
   const fullName = string(repository.full_name, "repository.full_name");
   const [ownerName, repositoryName] = fullName.split("/");
   if (!ownerName || !repositoryName || ownerName !== string(owner.login, "owner.login")) {
@@ -19632,7 +19549,7 @@ function positiveInteger(value, name) {
 
 // src/comment.ts
 var markerPattern = /<!-- theme-proof-state:([A-Za-z0-9_-]+) -->/;
-function renderPreviewComment(state) {
+function renderPreviewComment(state, strict = true) {
   return [
     "## Theme Proof",
     "",
@@ -19640,7 +19557,7 @@ function renderPreviewComment(state) {
     "",
     `[Storefront preview](${state.previewUrl}) \xB7 [Theme Editor](${state.editorUrl})`,
     "",
-    `Theme Check: passed  `,
+    `Theme Check: ${strict ? "passed" : "not run"}`,
     `Context: \`${escapeCode(state.context)}\``,
     "",
     marker(state)
@@ -19676,7 +19593,7 @@ function validateState(value) {
     throw new Error("Theme Proof comment contains invalid state");
   }
   const state = value;
-  if (state.schemaVersion !== 1 || typeof state.repository !== "string" || typeof state.pullRequest !== "number" || typeof state.context !== "string" || typeof state.store !== "string" || typeof state.themeId !== "string" || typeof state.previewUrl !== "string" || typeof state.editorUrl !== "string" || typeof state.sha !== "string") {
+  if (state.schemaVersion !== 1 || typeof state.repository !== "string" || typeof state.pullRequest !== "number" || !Number.isSafeInteger(state.pullRequest) || state.pullRequest <= 0 || typeof state.context !== "string" || typeof state.store !== "string" || typeof state.themeId !== "string" || typeof state.previewUrl !== "string" || typeof state.editorUrl !== "string" || typeof state.sha !== "string" || !/^[1-9]\d*$/.test(state.themeId) || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(state.context) || !/^[a-z0-9][a-z0-9-]*\.myshopify\.com$/.test(state.store)) {
     throw new Error("Theme Proof comment contains invalid state");
   }
   return state;
@@ -19699,6 +19616,15 @@ var GitHubClient = class {
     this.#commentAuthor = commentAuthor;
     this.#fetch = fetcher;
   }
+  async currentPullRequest() {
+    const pull = await this.#request(
+      `/repos/${this.#context.fullName}/pulls/${this.#context.pullRequest}`
+    );
+    if (!["open", "closed"].includes(pull.state) || typeof pull.head?.sha !== "string") {
+      throw new Error("GitHub API returned invalid pull request state");
+    }
+    return { state: pull.state, sha: pull.head.sha };
+  }
   async findProofComment() {
     for (let page = 1; page <= 10; page += 1) {
       const comments = await this.#request(
@@ -19707,7 +19633,9 @@ var GitHubClient = class {
       for (const comment of comments) {
         if (comment.user.login !== this.#commentAuthor) continue;
         const state = readPreviewState(comment.body);
-        if (state) return { comment, state };
+        if (state && state.repository === this.#context.fullName && state.pullRequest === this.#context.pullRequest) {
+          return { comment, state };
+        }
       }
       if (comments.length < 100) return void 0;
     }
@@ -19732,6 +19660,7 @@ var GitHubClient = class {
   async #request(path, init = {}) {
     const response = await this.#fetch(`https://api.github.com${path}`, {
       ...init,
+      signal: AbortSignal.timeout(3e4),
       headers: {
         Accept: "application/vnd.github+json",
         Authorization: `Bearer ${this.#token}`,
@@ -19749,9 +19678,176 @@ var GitHubClient = class {
   }
 };
 
+// src/artifact.ts
+var import_promises2 = require("fs/promises");
+var import_node_fs = require("fs");
+var import_node_path = require("path");
+var allowedDirectories = /* @__PURE__ */ new Set([
+  "assets",
+  "blocks",
+  "config",
+  "layout",
+  "locales",
+  "sections",
+  "snippets",
+  "templates"
+]);
+var defaultArtifactLimits = {
+  maxFiles: 5e3,
+  maxFileBytes: 10 * 1024 * 1024,
+  maxTotalBytes: 100 * 1024 * 1024
+};
+async function validateThemeArtifact(configuredRoot, limits = defaultArtifactLimits) {
+  assertLimits(limits);
+  const root = await realDirectory(configuredRoot, "theme-path");
+  const topLevel = await (0, import_promises2.readdir)(root, { withFileTypes: true });
+  for (const entry of topLevel) {
+    if (!entry.isDirectory() || !allowedDirectories.has(entry.name)) {
+      throw new Error(
+        `theme artifact contains unsupported top-level entry: ${entry.name}`
+      );
+    }
+  }
+  await requireLayout(root);
+  const summary2 = { root, files: 0, bytes: 0 };
+  for (const entry of topLevel) {
+    await inspectDirectory((0, import_node_path.join)(root, entry.name), root, summary2, limits);
+  }
+  if (summary2.files === 0) throw new Error("theme artifact contains no files");
+  return summary2;
+}
+async function inspectDirectory(directory, root, summary2, limits) {
+  const entries = await (0, import_promises2.readdir)(directory, { withFileTypes: true });
+  for (const entry of entries) {
+    const path = (0, import_node_path.join)(directory, entry.name);
+    const metadata = await (0, import_promises2.lstat)(path);
+    const name = portablePath(root, path);
+    if (metadata.isSymbolicLink()) {
+      throw new Error(`theme artifact cannot contain symbolic links: ${name}`);
+    }
+    if (metadata.isDirectory()) {
+      await inspectDirectory(path, root, summary2, limits);
+      continue;
+    }
+    inspectFile(metadata, name, summary2, limits);
+  }
+}
+function inspectFile(metadata, name, summary2, limits) {
+  if (!metadata.isFile()) {
+    throw new Error(
+      `theme artifact contains an unsupported file type: ${name}`
+    );
+  }
+  summary2.files += 1;
+  summary2.bytes += metadata.size;
+  if (summary2.files > limits.maxFiles) {
+    throw new Error(`theme artifact exceeds the ${limits.maxFiles} file limit`);
+  }
+  if (metadata.size > limits.maxFileBytes) {
+    throw new Error(`theme artifact file exceeds the size limit: ${name}`);
+  }
+  if (summary2.bytes > limits.maxTotalBytes) {
+    throw new Error("theme artifact exceeds the total size limit");
+  }
+}
+async function requireLayout(root) {
+  const layout = await (0, import_promises2.lstat)((0, import_node_path.join)(root, "layout", "theme.liquid"));
+  if (!layout.isFile() || layout.isSymbolicLink()) {
+    throw new Error("layout/theme.liquid must be a regular file");
+  }
+}
+async function realDirectory(path, name) {
+  const unresolved = (0, import_node_path.resolve)(path);
+  const metadata = await (0, import_promises2.lstat)(unresolved);
+  if (metadata.isSymbolicLink() || !metadata.isDirectory()) {
+    throw new Error(`${name} must be a real directory, not a symbolic link`);
+  }
+  return (0, import_promises2.realpath)(unresolved);
+}
+function portablePath(root, path) {
+  return (0, import_node_path.relative)(root, path).split(import_node_path.sep).join("/");
+}
+function assertLimits(limits) {
+  for (const [name, value] of Object.entries(limits)) {
+    if (!Number.isSafeInteger(value) || value <= 0) {
+      throw new Error(`${name} must be a positive integer`);
+    }
+  }
+}
+
+// src/preview.ts
+async function runPreview(options, { github, shopify }) {
+  const current = await github.currentPullRequest();
+  if (options.mode === "deploy" && (current.state !== "open" || current.sha !== options.repository.sha)) {
+    return {
+      status: "skipped",
+      reason: "Pull request is closed or this commit is no longer current."
+    };
+  }
+  if (options.mode === "cleanup" && current.state !== "closed") {
+    return {
+      status: "skipped",
+      reason: "Pull request has reopened; keeping its preview."
+    };
+  }
+  const existing = await github.findProofComment();
+  if (existing) assertMatchingState(existing.state, options);
+  if (options.mode === "cleanup") {
+    await shopify.deleteTheme(existing?.state.themeId, options.context);
+    if (existing)
+      await github.upsertComment(renderRemovedComment(existing.state));
+    return { status: "removed" };
+  }
+  const artifact = await validateThemeArtifact(options.themePath);
+  const theme = await shopify.pushPreview({
+    path: artifact.root,
+    context: options.context,
+    strict: options.strict
+  });
+  const state = {
+    schemaVersion: 1,
+    repository: options.repository.fullName,
+    pullRequest: options.repository.pullRequest,
+    context: options.context,
+    store: options.store,
+    themeId: theme.id,
+    previewUrl: theme.previewUrl,
+    editorUrl: theme.editorUrl,
+    sha: options.repository.sha
+  };
+  await github.upsertComment(renderPreviewComment(state, options.strict));
+  return { status: "deployed", theme };
+}
+function assertMatchingState(state, options) {
+  if (state.repository !== options.repository.fullName || state.pullRequest !== options.repository.pullRequest || state.store !== options.store || state.context !== options.context) {
+    throw new Error("recorded preview state does not match this pull request");
+  }
+}
+
 // src/shopify.ts
+var import_node_child_process2 = require("child_process");
+
+// src/process.ts
 var import_node_child_process = require("child_process");
-var minimumCliVersion = [4, 6, 1];
+function stopProcessTree(child) {
+  if (!child.pid) return;
+  if (process.platform === "win32") {
+    const killer = (0, import_node_child_process.spawn)("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
+      stdio: "ignore",
+      shell: false
+    });
+    killer.once("error", () => child.kill("SIGKILL"));
+    return;
+  }
+  try {
+    process.kill(-child.pid, "SIGKILL");
+  } catch {
+    child.kill("SIGKILL");
+  }
+}
+
+// src/shopify.ts
+var minimumCliVersion = [4, 8, 0];
 var maxOutputBytes = 1e6;
 var ShopifyClient = class {
   #command;
@@ -19783,26 +19879,76 @@ var ShopifyClient = class {
       "push",
       "--path",
       options.path,
+      "--development",
       "--development-context",
       options.context,
       "--json"
     ];
     if (options.strict) args.push("--strict");
     const result = await this.#run(args, options.path, 10 * 6e4);
-    return parseThemePreview(result.stdout, this.#store);
+    const theme = parseThemePreview(result.stdout, this.#store);
+    if (theme.name !== options.context) {
+      throw new Error("Shopify CLI returned a different development context");
+    }
+    return theme;
   }
-  async deleteTheme(themeId2) {
-    if (!/^\d+$/.test(themeId2))
-      throw new Error("theme ID must contain only digits");
+  async deleteTheme(themeId2, context) {
+    if (themeId2 !== void 0 && !/^[1-9]\d*$/.test(themeId2))
+      throw new Error("theme ID must be a positive integer");
+    const themes = await this.#listThemes();
+    const matches = themes.filter(
+      (item) => themeId2 === void 0 ? item.name === context : item.id === themeId2
+    );
+    if (matches.length > 1) throw new Error("development context is ambiguous");
+    const theme = matches[0];
+    if (!theme) return;
+    if (theme.role !== "development" || theme.name !== context) {
+      throw new Error(
+        "refusing to delete a theme outside this development context"
+      );
+    }
     await this.#run(
-      ["theme", "delete", "--theme", themeId2, "--force", "--no-color"],
+      ["theme", "delete", "--theme", theme.id, "--force", "--no-color"],
       void 0,
       5 * 6e4
     );
+    if ((await this.#listThemes()).some((item) => item.id === theme.id)) {
+      throw new Error("Shopify CLI did not remove the preview theme");
+    }
+  }
+  async #listThemes() {
+    const result = await this.#run(
+      ["theme", "list", "--json"],
+      void 0,
+      6e4
+    );
+    const value = JSON.parse(result.stdout);
+    if (!Array.isArray(value))
+      throw new Error("Shopify CLI returned invalid theme list");
+    return value.map((item) => {
+      if (typeof item !== "object" || item === null) {
+        throw new Error("Shopify CLI returned invalid theme list");
+      }
+      const data = item;
+      return {
+        id: themeId(data.id),
+        name: requiredString(data.name, "theme.name"),
+        role: requiredString(data.role, "theme.role")
+      };
+    });
   }
   async #run(args, cwd, timeoutMs) {
+    const inherited = { ...process.env };
+    for (const name of Object.keys(inherited)) {
+      if (/^(SHOPIFY_|INPUT_)/i.test(name) || /(?:^|_)(?:TOKEN|SECRET|PASSWORD|PRIVATE_KEY|ACCESS_KEY)(?:_|$)/i.test(
+        name
+      )) {
+        delete inherited[name];
+      }
+    }
     const env = {
-      ...process.env,
+      ...inherited,
+      CI: "true",
       SHOPIFY_CLI_THEME_TOKEN: this.#password,
       SHOPIFY_FLAG_STORE: this.#store,
       SHOPIFY_FLAG_FORCE: "1",
@@ -19828,7 +19974,7 @@ var ShopifyClient = class {
 function parseThemePreview(stdout, expectedStore) {
   let value;
   try {
-    value = JSON.parse(stdout.trim());
+    value = parsePushOutput(stdout);
   } catch {
     throw new Error("Shopify CLI returned invalid JSON");
   }
@@ -19840,6 +19986,9 @@ function parseThemePreview(stdout, expectedStore) {
     throw new Error("Shopify CLI returned invalid theme data");
   }
   const data = theme;
+  if (data.warning !== void 0 || data.errors !== void 0) {
+    throw new Error("Shopify CLI reported theme upload errors");
+  }
   const id = themeId(data.id);
   const name = requiredString(data.name, "theme.name");
   const role = requiredString(data.role, "theme.role");
@@ -19857,7 +20006,10 @@ function parseThemePreview(stdout, expectedStore) {
   if (previewUrl.searchParams.get("preview_theme_id") !== id) {
     throw new Error("Shopify CLI returned a mismatched preview URL");
   }
-  if (![expectedStore, "admin.shopify.com"].includes(editorUrl.hostname) || !editorUrl.pathname.includes(`/themes/${id}/editor`)) {
+  if (![expectedStore, "admin.shopify.com"].includes(editorUrl.hostname) || ![
+    `/admin/themes/${id}/editor`,
+    `/store/${expectedStore.replace(/\.myshopify\.com$/, "")}/themes/${id}/editor`
+  ].includes(editorUrl.pathname)) {
     throw new Error("Shopify CLI returned a mismatched Theme Editor URL");
   }
   return {
@@ -19869,11 +20021,33 @@ function parseThemePreview(stdout, expectedStore) {
     previewUrl: previewUrl.href
   };
 }
+function parsePushOutput(stdout) {
+  const text = stdout.trim();
+  try {
+    return JSON.parse(text);
+  } catch {
+    const lines = text.split(/\r?\n/);
+    const preview = lines.pop();
+    const checks = JSON.parse(lines.join("\n"));
+    if (!Array.isArray(checks) || !preview)
+      throw new Error("invalid push output");
+    for (const check of checks) {
+      if (typeof check !== "object" || check === null)
+        throw new Error("invalid checks");
+      const result = check;
+      if (result.errorCount !== 0 || !Array.isArray(result.offenses)) {
+        throw new Error("Theme Check did not pass");
+      }
+    }
+    return JSON.parse(preview);
+  }
+}
 var runCommand = (command, args, options) => new Promise((resolve3, reject) => {
-  const child = (0, import_node_child_process.spawn)(command, args, {
+  const child = (0, import_node_child_process2.spawn)(command, args, {
     cwd: options.cwd,
     env: options.env,
     shell: false,
+    detached: process.platform !== "win32",
     stdio: ["ignore", "pipe", "pipe"]
   });
   let stdout = "";
@@ -19882,7 +20056,8 @@ var runCommand = (command, args, options) => new Promise((resolve3, reject) => {
   const append = (target, chunk) => {
     outputBytes += chunk.byteLength;
     if (outputBytes > maxOutputBytes) {
-      child.kill();
+      stopProcessTree(child);
+      clearTimeout(timeout);
       reject(new Error("Shopify CLI output exceeded the safety limit"));
       return;
     }
@@ -19893,7 +20068,7 @@ var runCommand = (command, args, options) => new Promise((resolve3, reject) => {
   child.stderr.on("data", (chunk) => append("stderr", chunk));
   child.once("error", reject);
   const timeout = setTimeout(() => {
-    child.kill();
+    stopProcessTree(child);
     reject(new Error("Shopify CLI timed out"));
   }, options.timeoutMs);
   timeout.unref();
@@ -19910,7 +20085,7 @@ function compareVersion(left, right) {
   return 0;
 }
 function themeId(value) {
-  if (typeof value === "string" && /^\d+$/.test(value)) return value;
+  if (typeof value === "string" && /^[1-9]\d*$/.test(value)) return value;
   if (typeof value === "number" && Number.isSafeInteger(value) && value > 0) {
     return String(value);
   }
@@ -19923,7 +20098,9 @@ function requiredString(value, name) {
 }
 function validatedUrl(value, name) {
   const url = new URL(requiredString(value, name));
-  if (url.protocol !== "https:") throw new Error(`${name} must use HTTPS`);
+  if (url.protocol !== "https:" || url.username || url.password || url.port) {
+    throw new Error(`${name} must be a credential-free HTTPS URL`);
+  }
   return url;
 }
 function redact(value, secret) {
@@ -19932,6 +20109,17 @@ function redact(value, secret) {
 
 // src/action.ts
 async function run() {
+  if (process.env.GITHUB_EVENT_NAME !== "pull_request") {
+    throw new Error(
+      "Theme Proof requires a pull_request event; pull_request_target is not supported"
+    );
+  }
+  const mode = getInput("mode") || "deploy";
+  if (mode !== "deploy" && mode !== "cleanup")
+    throw new Error("mode must be deploy or cleanup");
+  if ((getInput("target-mode") || "development-context") !== "development-context") {
+    throw new Error("target-mode currently supports only development-context");
+  }
   const password = getInput("password", { required: true });
   const githubToken = getInput("github-token", { required: true });
   setSecret(password);
@@ -19958,66 +20146,32 @@ async function run() {
     store,
     password
   });
-  const cliVersion = await shopify.verifyVersion();
-  info(`Using Shopify CLI ${cliVersion}`);
-  const targetMode = getInput("target-mode") || "development-context";
-  if (targetMode !== "development-context") {
-    throw new Error("target-mode currently supports only development-context");
-  }
-  const mode = getInput("mode") || "deploy";
-  if (mode === "cleanup") {
-    const existing = await github.findProofComment();
-    if (!existing) {
-      notice("No Theme Proof preview was recorded for this pull request.");
-      return;
-    }
-    assertMatchingState(
-      existing.state,
-      repository.fullName,
-      repository.pullRequest,
+  info(`Using Shopify CLI ${await shopify.verifyVersion()}`);
+  const result = await runPreview(
+    {
+      repository,
+      mode,
       store,
-      context
-    );
-    await shopify.deleteTheme(existing.state.themeId);
-    await github.upsertComment(renderRemovedComment(existing.state));
-    notice(`Removed Theme Proof preview ${existing.state.themeId}.`);
+      context,
+      themePath: (0, import_node_path2.resolve)(getInput("theme-path") || "."),
+      strict: parseBoolean(getInput("strict") || "true", "strict")
+    },
+    { github, shopify }
+  );
+  if (result.status === "skipped") {
+    notice(result.reason);
     return;
   }
-  if (mode !== "deploy") throw new Error("mode must be deploy or cleanup");
-  const artifact = await validateThemeArtifact(
-    (0, import_node_path2.resolve)(getInput("theme-path") || ".")
-  );
-  info(
-    `Validated ${artifact.files} theme files (${artifact.bytes} bytes).`
-  );
-  const strict = parseBoolean(getInput("strict") || "true", "strict");
-  const theme = await shopify.pushPreview({
-    path: artifact.root,
-    context,
-    strict
-  });
-  const state = {
-    schemaVersion: 1,
-    repository: repository.fullName,
-    pullRequest: repository.pullRequest,
-    context,
-    store,
-    themeId: theme.id,
-    previewUrl: theme.previewUrl,
-    editorUrl: theme.editorUrl,
-    sha: repository.sha
-  };
-  await github.upsertComment(renderPreviewComment(state));
+  if (result.status === "removed") {
+    notice("Removed Theme Proof preview.");
+    return;
+  }
+  const { theme } = result;
   setOutput("theme-id", theme.id);
   setOutput("preview-url", theme.previewUrl);
   setOutput("editor-url", theme.editorUrl);
   setOutput("context", context);
   await summary.addHeading("Theme Proof").addLink("Storefront preview", theme.previewUrl).addRaw(" \xB7 ").addLink("Theme Editor", theme.editorUrl).write();
-}
-function assertMatchingState(state, repository, pullRequest, store, context) {
-  if (state.repository !== repository || state.pullRequest !== pullRequest || state.store !== store || state.context !== context) {
-    throw new Error("recorded preview state does not match this pull request");
-  }
 }
 run().catch((error2) => {
   setFailed(error2 instanceof Error ? error2.message : String(error2));

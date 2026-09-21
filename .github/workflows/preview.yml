@@ -22,21 +22,23 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
-
-concurrency:
-  group: theme-proof-${{ github.repository_id }}-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
 
 jobs:
   build:
     name: Build theme artifact
-    if: github.event.action != 'closed'
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.id == github.event.repository.id && github.event.action != 'closed'
     runs-on: ubuntu-latest
+    timeout-minutes: 50
+    permissions:
+      contents: read
+    concurrency:
+      group: theme-proof-build-${{ github.repository_id }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
@@ -56,9 +58,16 @@ jobs:
 
   deploy:
     name: Deploy theme preview
-    if: github.event.action != 'closed'
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.id == github.event.repository.id && github.event.action != 'closed'
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: theme-proof-remote-${{ github.repository_id }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
     environment: ${{ inputs.environment }}
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -85,8 +94,15 @@ jobs:
 
   cleanup:
     name: Remove theme preview
-    if: github.event.action == 'closed'
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.id == github.event.repository.id && github.event.action == 'closed'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: theme-proof-remote-${{ github.repository_id }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: false
     environment: ${{ inputs.environment }}
     steps:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0

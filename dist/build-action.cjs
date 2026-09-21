@@ -6,7 +6,11 @@ var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __commonJS = (cb, mod) => function __require() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  try {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  } catch (e) {
+    throw mod = 0, e;
+  }
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -19505,7 +19509,7 @@ async function prepareThemeArtifact(sourceRoot, destinationRoot, limits = defaul
       limits
     );
   }
-  await (0, import_promises.access)((0, import_node_path.join)(destination, "layout", "theme.liquid"));
+  await requireLayout(destination);
   if (summary2.files === 0) throw new Error("theme artifact contains no files");
   return summary2;
 }
@@ -19546,6 +19550,12 @@ function inspectFile(metadata, name, summary2, limits) {
     throw new Error("theme artifact exceeds the total size limit");
   }
 }
+async function requireLayout(root) {
+  const layout = await (0, import_promises.lstat)((0, import_node_path.join)(root, "layout", "theme.liquid"));
+  if (!layout.isFile() || layout.isSymbolicLink()) {
+    throw new Error("layout/theme.liquid must be a regular file");
+  }
+}
 async function realDirectory(path, name) {
   const unresolved = (0, import_node_path.resolve)(path);
   const metadata = await (0, import_promises.lstat)(unresolved);
@@ -19570,7 +19580,28 @@ function assertLimits(limits) {
 }
 
 // src/build-runner.ts
+var import_node_child_process2 = require("child_process");
+
+// src/process.ts
 var import_node_child_process = require("child_process");
+function stopProcessTree(child) {
+  if (!child.pid) return;
+  if (process.platform === "win32") {
+    const killer = (0, import_node_child_process.spawn)("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
+      stdio: "ignore",
+      shell: false
+    });
+    killer.once("error", () => child.kill("SIGKILL"));
+    return;
+  }
+  try {
+    process.kill(-child.pid, "SIGKILL");
+  } catch {
+    child.kill("SIGKILL");
+  }
+}
+
+// src/build-runner.ts
 async function runConfiguredBuild(config, runner = runShellCommand) {
   const env = buildEnvironment();
   if (config.setup) {
@@ -19596,15 +19627,16 @@ async function runConfiguredBuild(config, runner = runShellCommand) {
   }
 }
 var runShellCommand = (command, options) => new Promise((resolve3, reject) => {
-  const child = (0, import_node_child_process.spawn)(command, {
+  const child = (0, import_node_child_process2.spawn)(command, {
     cwd: options.cwd,
     env: options.env,
     shell: true,
+    detached: process.platform !== "win32",
     stdio: "inherit"
   });
   child.once("error", reject);
   const timeout = setTimeout(() => {
-    child.kill();
+    stopProcessTree(child);
     reject(new Error("build command timed out"));
   }, options.timeoutMs);
   timeout.unref();
@@ -19645,6 +19677,7 @@ async function loadProjectConfig(workspace, configuredPath) {
   const requested = configuredPath.trim();
   if (requested === "") return resolveConfig(defaults, root);
   const configPath = inside(root, requested, "config");
+  await assertWorkspacePath(root, configPath);
   let content;
   try {
     content = await (0, import_promises2.readFile)(configPath, "utf8");
@@ -19670,7 +19703,10 @@ function validateConfig(value) {
   rejectUnknown(config, ["$schema", "version", "build"], "config");
   if (config.version !== 1)
     throw new Error("Theme Proof config version must be 1");
-  const build = record(config.build ?? {}, "build");
+  if (config.$schema !== void 0 && typeof config.$schema !== "string") {
+    throw new Error("$schema must be a string");
+  }
+  const build = record(config.build === void 0 ? {} : config.build, "build");
   rejectUnknown(
     build,
     ["workingDirectory", "themeDirectory", "setup", "install", "command"],
@@ -19740,6 +19776,23 @@ function optionalCommand(value, name, property = "install") {
     throw new Error(`${name} must be a string or null`);
   return { [property]: value };
 }
+async function assertWorkspacePath(workspace, path) {
+  const root = await (0, import_promises2.realpath)(workspace);
+  let candidate = (0, import_node_path2.resolve)(path);
+  for (; ; ) {
+    try {
+      const canonical = await (0, import_promises2.realpath)(candidate);
+      const relationship = (0, import_node_path2.relative)(root, canonical);
+      if ((0, import_node_path2.isAbsolute)(relationship) || relationship === ".." || relationship.startsWith(`..${import_node_path2.sep}`)) {
+        throw new Error("resolved path cannot leave the GitHub workspace");
+      }
+      return;
+    } catch (error2) {
+      if (!isMissing(error2) || (0, import_node_path2.dirname)(candidate) === candidate) throw error2;
+      candidate = (0, import_node_path2.dirname)(candidate);
+    }
+  }
+}
 function isMissing(error2) {
   return typeof error2 === "object" && error2 !== null && "code" in error2 && error2.code === "ENOENT";
 }
@@ -19759,7 +19812,9 @@ async function run() {
       "No Theme Proof config found; using a no-build theme at the repository root."
     );
   }
+  await assertWorkspacePath(workspace, config.workingDirectory);
   await runConfiguredBuild(config);
+  await assertWorkspacePath(workspace, config.themeDirectory);
   const runnerTemp = process.env.RUNNER_TEMP;
   if (!runnerTemp) throw new Error("RUNNER_TEMP is required");
   const artifact = await prepareThemeArtifact(

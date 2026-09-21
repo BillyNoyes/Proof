@@ -34,7 +34,7 @@ Shopify supports the core workflow through public tooling:
 
 - The Theme Access app creates revocable credentials for theme development and CI.
 - Shopify CLI accepts `SHOPIFY_CLI_THEME_TOKEN` and `SHOPIFY_FLAG_STORE` in CI.
-- `shopify theme push --development-context <context>` creates or reuses a named development context.
+- `shopify theme push --development --development-context <context>` creates or reuses a named development context.
 - `shopify theme push --json` returns the theme ID, role, shop, editor URL, and preview URL.
 - `shopify theme push --strict` requires Theme Check to pass without errors.
 - `shopify theme delete --theme <id> --force` supports non-interactive cleanup.
@@ -145,19 +145,19 @@ Hash or truncate the value if Shopify imposes a context length limit.
 
 ### Open or synchronize
 
-1. Cancel an older in-progress build for the same pull request.
+1. Cancel an older in-progress build for the same pull request; serialize remote mutations without canceling an active deployment.
 2. Build the latest commit without credentials.
 3. Validate and upload the artifact.
-4. Push with the stable development context and JSON output.
+4. Check current PR state and head SHA, then push with the stable development context and JSON output.
 5. Record the returned theme ID and URLs.
 6. Create or edit the bot-owned pull request comment.
 
 ### Close
 
-1. Read the theme ID from trusted state or the bot-owned comment marker.
-2. Delete the remote theme with confirmation disabled.
-3. Update the comment to show that the preview was removed.
-4. Treat an already missing theme as successful cleanup.
+1. Confirm the PR is still closed and read the theme ID from the matching bot-owned comment marker; if no comment was recorded, resolve the trusted context by name.
+2. Verify the remote theme's current development role and exact context name before deleting with confirmation disabled.
+3. Confirm removal, then update the recorded comment if one exists.
+4. Treat an already missing theme as successful cleanup, but do not treat authentication or network failures as missing themes.
 
 A hosted app should store this mapping in a database. The Actions-only version can use a machine-readable marker in a comment created by the action, but must verify comment authorship before trusting it.
 
@@ -279,7 +279,7 @@ Still unproven until store-backed validation:
 ### Milestone 3: GitHub integration
 
 - Build reusable workflow with separate build and deployment jobs.
-- Add concurrency cancellation per pull request.
+- Cancel superseded builds and serialize deployment/cleanup per pull request.
 - Create and update a persistent pull request comment.
 - Store trusted cleanup state.
 - Support open, synchronize, reopen, and close events.
@@ -287,7 +287,7 @@ Still unproven until store-backed validation:
 
 ### Milestone 4: release
 
-- Publish immutable GitHub Action tags and a moving `v1` major tag.
+- Pin internal Action references to reviewed commit SHAs, publish versioned releases, and create a moving `v1` major tag only for a validated stable release.
 - Publish `theme-proof` only if a CLI or reusable Node API is useful outside Actions.
 - Add provenance and trusted publishing.
 - Document permissions, secrets, threat model, and incident reporting.

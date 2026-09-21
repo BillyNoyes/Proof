@@ -86,6 +86,20 @@ describe('theme artifact validation', () => {
     },
   );
 
+  it('rejects a directory in place of the required layout file', async () => {
+    const root = await theme();
+    await rm(join(root, 'layout/theme.liquid'));
+    await mkdir(join(root, 'layout/theme.liquid'));
+    await expect(validateThemeArtifact(root)).rejects.toThrow(
+      'must be a regular file',
+    );
+    const destination = `${root}-staged`;
+    roots.push(destination);
+    await expect(prepareThemeArtifact(root, destination)).rejects.toThrow(
+      'must be a regular file',
+    );
+  });
+
   it('enforces file and byte limits', async () => {
     const root = await theme();
     await expect(

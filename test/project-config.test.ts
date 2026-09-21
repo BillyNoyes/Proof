@@ -1,8 +1,8 @@
-import {mkdir, mkdtemp, rm, writeFile} from 'node:fs/promises';
+import {mkdir, mkdtemp, rm, symlink, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {afterEach, describe, expect, it} from 'vitest';
-import {loadProjectConfig} from '../src/project-config.js';
+import {assertWorkspacePath, loadProjectConfig} from '../src/project-config.js';
 
 const roots: string[] = [];
 afterEach(async () => {
@@ -57,9 +57,37 @@ describe('Theme Proof project config', () => {
     });
   });
 
+  it('allows not-yet-created build output beneath the workspace', async () => {
+    const root = await workspace();
+    await expect(
+      assertWorkspacePath(root, join(root, 'dist/theme')),
+    ).resolves.toBeUndefined();
+  });
+
+  it.skipIf(process.platform === 'win32')(
+    'rejects config and output paths through escaping parent symlinks',
+    async () => {
+      const root = await workspace();
+      const outside = await workspace();
+      await writeFile(
+        join(outside, 'proof.json'),
+        JSON.stringify({version: 1}),
+      );
+      await symlink(outside, join(root, 'linked'));
+      await expect(
+        loadProjectConfig(root, 'linked/proof.json'),
+      ).rejects.toThrow('cannot leave');
+      await expect(
+        assertWorkspacePath(root, join(root, 'linked/dist')),
+      ).rejects.toThrow('cannot leave');
+    },
+  );
+
   it.each([
     {version: 2},
     {version: 1, unknown: true},
+    {version: 1, build: null},
+    {version: 1, $schema: 1},
     {version: 1, build: {themeDirectory: '../outside'}},
     {version: 1, build: {workingDirectory: '/absolute'}},
   ])('rejects unsafe or unsupported config %#', async (config) => {

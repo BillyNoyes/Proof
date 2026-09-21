@@ -1,2 +1,6 @@
 packages:
   - site
+
+overrides:
+  # GHSA-g7r4-m6w7-qqqr affects the esbuild version included by tsup.
+  'tsup>esbuild': 0.28.1

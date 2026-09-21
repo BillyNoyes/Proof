@@ -42,6 +42,10 @@ export async function readRepositoryContext(
   const owner = object(repository.owner, 'repository.owner');
   const pullRequest = object(event.pull_request, 'pull_request');
   const head = object(pullRequest.head, 'pull_request.head');
+  const headRepository = object(head.repo, 'pull_request.head.repo');
+  if (headRepository.id !== repository.id) {
+    throw new Error('fork pull requests cannot deploy previews');
+  }
   const fullName = string(repository.full_name, 'repository.full_name');
   const [ownerName, repositoryName] = fullName.split('/');
   if (

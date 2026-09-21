@@ -561,10 +561,13 @@ jobs:
               </li>
             </ul>
             <p>
-              New runs cancel older runs for the same PR. Development themes are
-              temporary, not permanent staging environments. Context reuse, URL
-              behavior on password-protected stores, and cleanup of expired or
-              manually deleted themes still need store-backed verification.
+              New builds cancel older builds for the same PR. Deployment and
+              cleanup are serialized without canceling running mutations; stale
+              commits and cleanup for reopened PRs are skipped. Development
+              themes are temporary, not permanent staging environments. Context
+              reuse, URL behavior on password-protected stores, and cleanup of
+              expired or manually deleted themes still need store-backed
+              verification.
             </p>
             <p>
               <strong
@@ -589,7 +592,8 @@ jobs:
             </p>
             <ul>
               <li>
-                The build job runs repository commands without the Shopify
+                The build job checks out the PR head SHA and runs repository
+                commands with read-only repository access and no Shopify
                 environment.
               </li>
               <li>

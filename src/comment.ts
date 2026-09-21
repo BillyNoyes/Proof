@@ -2,7 +2,10 @@ import type {PreviewState} from './types.js';
 
 const markerPattern = /<!-- theme-proof-state:([A-Za-z0-9_-]+) -->/;
 
-export function renderPreviewComment(state: PreviewState): string {
+export function renderPreviewComment(
+  state: PreviewState,
+  strict = true,
+): string {
   return [
     '## Theme Proof',
     '',
@@ -10,7 +13,7 @@ export function renderPreviewComment(state: PreviewState): string {
     '',
     `[Storefront preview](${state.previewUrl}) · [Theme Editor](${state.editorUrl})`,
     '',
-    `Theme Check: passed  `,
+    `Theme Check: ${strict ? 'passed' : 'not run'}`,
     `Context: \`${escapeCode(state.context)}\``,
     '',
     marker(state),
@@ -54,12 +57,17 @@ function validateState(value: unknown): PreviewState {
     state.schemaVersion !== 1 ||
     typeof state.repository !== 'string' ||
     typeof state.pullRequest !== 'number' ||
+    !Number.isSafeInteger(state.pullRequest) ||
+    state.pullRequest <= 0 ||
     typeof state.context !== 'string' ||
     typeof state.store !== 'string' ||
     typeof state.themeId !== 'string' ||
     typeof state.previewUrl !== 'string' ||
     typeof state.editorUrl !== 'string' ||
-    typeof state.sha !== 'string'
+    typeof state.sha !== 'string' ||
+    !/^[1-9]\d*$/.test(state.themeId) ||
+    !/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(state.context) ||
+    !/^[a-z0-9][a-z0-9-]*\.myshopify\.com$/.test(state.store)
   ) {
     throw new Error('Theme Proof comment contains invalid state');
   }

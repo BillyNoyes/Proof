@@ -1,5 +1,5 @@
-import {readFile} from 'node:fs/promises';
-import {isAbsolute, relative, resolve, sep} from 'node:path';
+import {readFile, realpath} from 'node:fs/promises';
+import {dirname, isAbsolute, relative, resolve, sep} from 'node:path';
 
 export interface BuildConfig {
   workingDirectory: string;
@@ -40,6 +40,7 @@ export async function loadProjectConfig(
   const requested = configuredPath.trim();
   if (requested === '') return resolveConfig(defaults, root);
   const configPath = inside(root, requested, 'config');
+  await assertWorkspacePath(root, configPath);
   let content: string;
   try {
     content = await readFile(configPath, 'utf8');
@@ -66,7 +67,10 @@ function validateConfig(value: unknown): ProjectConfig {
   rejectUnknown(config, ['$schema', 'version', 'build'], 'config');
   if (config.version !== 1)
     throw new Error('Theme Proof config version must be 1');
-  const build = record(config.build ?? {}, 'build');
+  if (config.$schema !== undefined && typeof config.$schema !== 'string') {
+    throw new Error('$schema must be a string');
+  }
+  const build = record(config.build === undefined ? {} : config.build, 'build');
   rejectUnknown(
     build,
     ['workingDirectory', 'themeDirectory', 'setup', 'install', 'command'],
@@ -152,6 +156,31 @@ function optionalCommand(
   if (typeof value !== 'string')
     throw new Error(`${name} must be a string or null`);
   return {[property]: value};
+}
+
+export async function assertWorkspacePath(
+  workspace: string,
+  path: string,
+): Promise<void> {
+  const root = await realpath(workspace);
+  let candidate = resolve(path);
+  for (;;) {
+    try {
+      const canonical = await realpath(candidate);
+      const relationship = relative(root, canonical);
+      if (
+        isAbsolute(relationship) ||
+        relationship === '..' ||
+        relationship.startsWith(`..${sep}`)
+      ) {
+        throw new Error('resolved path cannot leave the GitHub workspace');
+      }
+      return;
+    } catch (error) {
+      if (!isMissing(error) || dirname(candidate) === candidate) throw error;
+      candidate = dirname(candidate);
+    }
+  }
 }
 
 function isMissing(error: unknown): boolean {
