@@ -40,7 +40,7 @@ jobs:
           THEME_PATH: ${{ steps.build.outputs.theme-path }}
           FILES: ${{ steps.build.outputs.files }}
         run: |
-          test "$FILES" -eq 2
+          test "$FILES" -eq 3
           test -f "$THEME_PATH/layout/theme.liquid"
           test -f "$THEME_PATH/assets/theme.css"
           test ! -e "$THEME_PATH/package.json"
