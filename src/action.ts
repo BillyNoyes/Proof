@@ -43,6 +43,10 @@ async function run(): Promise<void> {
   const cliVersion = await shopify.verifyVersion();
   core.info(`Using Shopify CLI ${cliVersion}`);
 
+  const targetMode = core.getInput('target-mode') || 'development-context';
+  if (targetMode !== 'development-context') {
+    throw new Error('target-mode currently supports only development-context');
+  }
   const mode = core.getInput('mode') || 'deploy';
   if (mode === 'cleanup') {
     const existing = await github.findProofComment();

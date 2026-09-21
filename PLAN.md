@@ -180,21 +180,25 @@ Updated: <timestamp>
 
 The comment must never contain Theme Access credentials, storefront passwords, customer data, or full environment dumps.
 
-## Proposed repository structure
+## Repository structure
 
 ```text
 .
-├── .github/
-│   └── workflows/
-├── actions/
-│   ├── deploy/
-│   └── cleanup/
+├── .github/workflows/
+├── actions/build/
+├── dist/
+├── schema/
+├── scripts/
 ├── src/
-│   ├── artifact/
-│   ├── comment/
-│   ├── github/
-│   ├── shopify/
-│   └── state/
+│   ├── action.ts
+│   ├── artifact.ts
+│   ├── build-action.ts
+│   ├── build-runner.ts
+│   ├── comment.ts
+│   ├── config.ts
+│   ├── github.ts
+│   ├── project-config.ts
+│   └── shopify.ts
 ├── test/
 ├── action.yml
 ├── package.json

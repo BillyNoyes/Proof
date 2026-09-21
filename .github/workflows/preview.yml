@@ -11,6 +11,10 @@ on:
         description: GitHub Environment containing the Shopify credential
         type: string
         default: theme-preview
+      target-mode:
+        description: Trusted preview target policy
+        type: string
+        default: development-context
       shopify-cli-version:
         description: Pinned Shopify CLI version
         type: string
@@ -81,6 +85,7 @@ jobs:
         with:
           mode: deploy
           theme-path: ${{ runner.temp }}/theme-proof-artifact
+          target-mode: ${{ inputs.target-mode }}
           store: ${{ secrets.SHOPIFY_FLAG_STORE }}
           password: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
           github-token: ${{ github.token }}
@@ -103,6 +108,7 @@ jobs:
         uses: BillyNoyes/Proof@main
         with:
           mode: cleanup
+          target-mode: ${{ inputs.target-mode }}
           store: ${{ secrets.SHOPIFY_FLAG_STORE }}
           password: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
           github-token: ${{ github.token }}

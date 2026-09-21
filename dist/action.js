@@ -418,6 +418,10 @@ async function run() {
   });
   const cliVersion = await shopify.verifyVersion();
   info(`Using Shopify CLI ${cliVersion}`);
+  const targetMode = getInput("target-mode") || "development-context";
+  if (targetMode !== "development-context") {
+    throw new Error("target-mode currently supports only development-context");
+  }
   const mode = getInput("mode") || "deploy";
   if (mode === "cleanup") {
     const existing = await github.findProofComment();

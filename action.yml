@@ -11,6 +11,9 @@ inputs:
   theme-path:
     description: Path to the prepared Shopify theme artifact
     default: .
+  target-mode:
+    description: Trusted preview target policy; only development-context is currently supported
+    default: development-context
   store:
     description: Full myshopify.com store domain
     required: true
