@@ -1,0 +1,24 @@
+name: Feature request
+description: Propose a focused Theme Proof improvement
+title: '[Feature]: '
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What pull request preview problem should Proof solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the smallest safe interface or workflow.
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security boundary
+      description: Explain whether this affects untrusted builds, credentials, deployment targets, or cleanup.

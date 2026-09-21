@@ -82,7 +82,7 @@ The first release will provide a reusable GitHub Actions workflow and deployment
 
 Proof is independently developed and has no Shopify sponsorship or endorsement.
 
-See [PLAN.md](PLAN.md) for the proposed architecture, constraints, milestones, and validation plan.
+See [PLAN.md](PLAN.md) for the proposed architecture, constraints, milestones, and validation plan. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request and report suspected vulnerabilities through the [security policy](SECURITY.md).
 
 ## License
 
