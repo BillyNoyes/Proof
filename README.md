@@ -4,7 +4,7 @@
 
 [Website](https://proof.billynoyes.co.uk/) · [Documentation](https://proof.billynoyes.co.uk/docs/)
 
-Proof is a planned open-source GitHub integration that builds a theme for each pull request, deploys it as a Shopify preview, and maintains one comment with the latest storefront and Theme Editor links.
+Proof is an open-source GitHub Action that builds a theme for each pull request, deploys it as a Shopify preview, and maintains one comment with the latest storefront and Theme Editor links.
 
 > **Status:** early implementation. The deployment core and project configuration are under active development; no stable GitHub Action, app, or npm package has been published yet.
 
@@ -20,7 +20,7 @@ Proof is a planned open-source GitHub integration that builds a theme for each p
 
 GitHub Action references always include the repository owner. A future release would therefore be referenced from `BillyNoyes/Proof`, while the package and CLI remain unscoped as `theme-proof`.
 
-## Proposed workflow
+## Preview workflow
 
 1. Build pull request code without Shopify credentials.
 2. validate the resulting theme artifact.
@@ -121,7 +121,7 @@ The repository now contains an early TypeScript implementation of:
 - pull request comment state, updates, and cleanup;
 - a reusable workflow with separate build, deployment, and cleanup jobs.
 
-This is not a stable release yet. The next required milestone is a store-backed integration test on a dedicated development store. See [REVIEW.md](REVIEW.md) for review results and remaining release gates. Cross-platform tests cover the code and build Action; the supported deployment workflow uses GitHub-hosted Ubuntu with Node.js 24 and Shopify CLI 4.8.0.
+This is not a stable release yet. Private development-store lifecycle testing has passed; see the sanitized [integration report](INTEGRATION.md) for coverage and limits. Authenticated storefront and Theme Editor interactions were not exercised. See [REVIEW.md](REVIEW.md) for review results and [RELEASING.md](RELEASING.md) for Marketplace publication steps. Cross-platform tests cover the code and build Action; the supported deployment workflow uses GitHub-hosted Ubuntu with Node.js 24 and Shopify CLI 4.8.0.
 
 ## Scope
 

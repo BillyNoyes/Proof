@@ -4,7 +4,7 @@ Review baseline: `de8601e` (before the release-hardening changes).
 
 ## Decision
 
-**Not ready for Marketplace publication until store-backed validation is complete.** The review found and corrected functional and security defects that passing unit tests had not covered. Automated checks are necessary but do not establish that Theme Access, development-context reuse, protected-store URLs, and cleanup work end to end on a real store.
+**Automated checks and private development-store lifecycle validation have passed.** The review found and corrected functional and security defects that passing unit tests had not covered. The subsequent [integration report](INTEGRATION.md) documents actual Theme Access, context reuse, comments, cleanup, and concurrency checks, along with browser-authentication and expiration limits. Marketplace publication still requires GitHub's release-page eligibility checks and the owner's final publishing action.
 
 ## Scope
 
@@ -34,7 +34,7 @@ Additional validation tightens comment identity, URL paths and credentials, conf
 
 ## Validation
 
-- 71 Action/core tests, including real subprocess tests and YAML workflow-policy assertions.
+- 72 Action/core tests, including real subprocess tests and YAML workflow-policy assertions.
 - 15 site interaction tests.
 - Formatting, typed linting, and strict TypeScript checks.
 - Self-contained Node 24 CommonJS Action bundles and generated license notices.
@@ -44,7 +44,7 @@ Additional validation tightens comment identity, URL paths and credentials, conf
 
 ## Outstanding gates
 
-1. **Development-store integration:** the repository had only a `github-pages` environment at review time. No `theme-preview` environment or store-backed deployment run was available. Follow the consumer-repository checklist in [RELEASING.md](RELEASING.md) and record sanitized run URLs before publication.
+1. **Integration coverage:** the supported lifecycle was validated in a private consumer repository. A missing named-secret authorization was corrected and regression-tested. Authenticated storefront/editor UI, natural seven-day expiration, and a cross-account fork remain outside the executed scope; see [INTEGRATION.md](INTEGRATION.md). Store-specific evidence and identifiers must remain private.
 2. **Marketplace publication:** use GitHub's release UI to validate name availability, choose the Marketplace category, and select the publication checkbox. The repository owner must satisfy GitHub's 2FA and Developer Agreement requirements. A draft release does not establish Marketplace eligibility or publish a listing.
 
 ## Residual limitations

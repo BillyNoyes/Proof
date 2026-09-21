@@ -25,7 +25,9 @@ Do not send credentials in chat, logs, issues, or release notes. Theme Access ha
 
 Use the caller workflow in the README, pointing at the release candidate commit. The reusable workflow's own `BillyNoyes/Proof` Action references must all be full commit SHAs containing the reviewed bundles, not `main` or a moving major tag.
 
-Record consumer workflow run URLs and sanitized results for each case:
+Record consumer workflow run URLs privately and publish only sanitized results. Use a private consumer repository when store identifiers and preview URLs must not appear in public Actions logs or PR comments. The executed release-candidate coverage is documented in [INTEGRATION.md](INTEGRATION.md).
+
+Validation checklist:
 
 - [ ] Open a same-repository PR with a plain no-build theme. Confirm deployment and one bot comment.
 - [ ] Open a PR using a real project build, including a nested output directory. Confirm the complete theme is staged.
@@ -37,9 +39,9 @@ Record consumer workflow run URLs and sanitized results for each case:
 - [ ] Reopen a PR and rerun an older close workflow. Confirm it does not delete the reopened preview.
 - [ ] Trigger rapid updates and close a PR during a build/deploy. Confirm no stale deployment survives cleanup; rerun cleanup if a manually canceled workflow requires reconciliation.
 - [ ] Confirm a fork PR is skipped and that the build job has no Shopify environment and no PR-write permission.
-- [ ] Revoke the test credential. Confirm failures do not expose it or announce successful deployment.
+- [ ] Verify invalid credentials fail without exposing a credential or announcing successful deployment. Ask the owner to revoke the dedicated test password after testing.
 
-Unit tests and inspection of CLI source are not substitutes for these runs. At the time of the repository review, no `theme-preview` environment or store-backed run was available in this repository.
+Unit tests and inspection of CLI source are not substitutes for these runs. Keep credentials and store-specific evidence in private test infrastructure, not in the public Proof repository. Distinguish authenticated UI checks from reaching a password or login gate.
 
 ## Prepare a version
 

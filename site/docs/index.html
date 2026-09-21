@@ -147,8 +147,8 @@
             <h2 id="getting-started-title">Getting started</h2>
             <p class="notice">
               <strong>Pre-release software.</strong> The Action is not published
-              on Marketplace yet. Store-backed end-to-end validation is still
-              required. Use a dedicated development store for experiments, not a
+              on Marketplace yet. Private development-store lifecycle tests have
+              passed. Use a dedicated development store for experiments, not a
               production store.
             </p>
             <p>
@@ -568,9 +568,11 @@ jobs:
               cleanup are serialized without canceling running mutations; stale
               commits and cleanup for reopened PRs are skipped. Development
               themes are temporary, not permanent staging environments. Context
-              reuse, URL behavior on password-protected stores, and cleanup of
-              expired or manually deleted themes still need store-backed
-              verification.
+              reuse, manual deletion, and repeated cleanup have passed private
+              development-store tests. Protected storefronts still require their
+              password, and the Theme Editor requires an authorized admin login.
+              Natural theme expiration and authenticated UI interactions were
+              not exercised.
             </p>
             <p>
               <strong
@@ -698,10 +700,15 @@ jobs:
               stable tag or Marketplace listing yet.
             </p>
             <p>
-              The next release gate is an end-to-end test against a dedicated
-              development store, followed by versioned Action references and a
-              Marketplace release. Existing and unpublished theme modes remain
-              future work.
+              The preview lifecycle has passed private development-store tests,
+              and internal Action references are pinned to reviewed commits.
+              Read the
+              <a
+                href="https://github.com/BillyNoyes/Proof/blob/main/INTEGRATION.md"
+                >integration report</a
+              >
+              for coverage and limits. Marketplace publication is the next step;
+              existing and unpublished theme modes remain future work.
             </p>
             <p>
               <a href="https://github.com/BillyNoyes/Proof/blob/main/PLAN.md"

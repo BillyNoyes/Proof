@@ -248,12 +248,13 @@ Implemented in the initial prototype:
 - Reusable workflow separating untrusted build, privileged deployment, and cleanup.
 - Unit tests and self-contained Node 24 Action bundles.
 
-Still unproven until store-backed validation:
+Private development-store validation has exercised creation, context reuse, named-secret authorization, complete nested builds, artifact transfer, current-head comments, manual deletion/recreation, cleanup/repeated cleanup, close-during-build behavior, and stale-run protection. See [INTEGRATION.md](INTEGRATION.md) for sanitized results.
 
-- Development-context reuse with Theme Access under concurrent pull request updates.
-- Preview and Theme Editor links on protected storefronts.
-- Cleanup behavior for expired or manually removed development themes.
-- End-to-end reusable workflow permissions and artifact semantics in a consumer repository.
+Remaining validation limits:
+
+- Authenticated storefront and Theme Editor interactions were not exercised; their password/login routes were checked.
+- Natural development-theme expiration was not observed; manual deletion and already-missing themes were tested.
+- Fork guards were executed with synthetic events through the bundled Action, not through a separate GitHub account.
 
 ## MVP milestones
 
