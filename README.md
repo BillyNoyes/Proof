@@ -2,7 +2,7 @@
 
 **Theme Proof — automatic pull request previews for Shopify Liquid themes.**
 
-[Website](https://billynoyes.github.io/Proof/) · [Documentation](https://billynoyes.github.io/Proof/docs/)
+[Website](https://proof.billynoyes.co.uk/) · [Documentation](https://proof.billynoyes.co.uk/docs/)
 
 Proof is a planned open-source GitHub integration that builds a theme for each pull request, deploys it as a Shopify preview, and maintains one comment with the latest storefront and Theme Editor links.
 

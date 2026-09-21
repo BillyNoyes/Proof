@@ -22,7 +22,7 @@ Browser checks cover light/dark themes, desktop viewport fit, mobile reflow, dir
 
 The `Deploy documentation` workflow builds and deploys `site/dist` on pushes to `main`. In repository **Settings → Pages**, select **GitHub Actions** as the source. GitHub's Pages configuration supplies the deployment base path. No Shopify credentials are involved.
 
-The default public URL is `https://billynoyes.github.io/Proof/`. If a custom domain is added, update canonical and Open Graph URLs in both HTML pages as well as the links in the root README. The workflow already supports root-path hosting.
+The public URL is `https://proof.billynoyes.co.uk/`, configured as the custom domain in GitHub Pages. The workflow builds at `/` for this domain and also supports the `/Proof/` project path. If the domain changes, update canonical and Open Graph URLs in both HTML pages as well as the links in the root README.
 
 ## Content and design
 
