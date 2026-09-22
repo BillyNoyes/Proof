@@ -91,6 +91,28 @@ try {
           font: getComputedStyle(document.body).fontFamily,
         }));
         assert.ok(dimensions.font.includes('Inter'));
+        const typography = await page.evaluate(() =>
+          ['.wordmark', '.primary-nav', '.site-footer'].map((selector) => {
+            const style = getComputedStyle(document.querySelector(selector));
+            return [style.fontSize, style.lineHeight];
+          }),
+        );
+        assert.deepEqual(typography, [
+          ['20px', '24px'],
+          ['13px', '18px'],
+          ['13px', '18px'],
+        ]);
+        assert.doesNotMatch(
+          await page.locator('.primary-nav').innerText(),
+          /[↗→]/,
+        );
+        if (!route)
+          assert.equal(
+            await page
+              .getByRole('link', {name: 'Read the docs', exact: true})
+              .innerText(),
+            'Read the docs',
+          );
         assert.ok(
           dimensions.width <= width,
           `${route} overflows horizontally at ${width}: ${dimensions.width}`,
