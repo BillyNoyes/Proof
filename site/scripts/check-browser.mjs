@@ -166,10 +166,12 @@ try {
   });
   const page = await context.newPage();
   await page.goto(`${origin}${base}docs/`);
-  const block = page.locator('.code-block').nth(1);
-  await block
-    .getByRole('button', {name: 'Copy .github/workflows/theme-proof.yml'})
-    .click();
+  const block = page.locator('.code-block').filter({
+    has: page.getByRole('button', {
+      name: 'Copy .github/workflows/theme-proof.yml',
+    }),
+  });
+  await block.getByRole('button').click();
   await page.waitForFunction(() =>
     [...document.querySelectorAll('[role="status"]')].some(
       (node) => node.textContent === 'Copied to clipboard.',

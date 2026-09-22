@@ -249,33 +249,6 @@
               Access can modify store themes; treat it as a privileged
               credential.
             </p>
-            <h3>Prefer the GitHub CLI?</h3>
-            <p>
-              After creating the environment, run these commands from your theme
-              repository. The first command prompts for the secret instead of
-              putting it in your shell history.
-            </p>
-            <div class="code-block" x-data="copyCode($el)">
-              <div class="code-header">
-                <span data-code-label id="secret-code">Terminal</span
-                ><button
-                  x-cloak
-                  type="button"
-                  @click="copy"
-                  :disabled="pending"
-                  :aria-label="`Copy ${label}`"
-                >
-                  Copy
-                </button>
-              </div>
-              <pre
-                tabindex="0"
-                role="region"
-                aria-labelledby="secret-code"
-              ><code>gh secret set --env theme-preview SHOPIFY_CLI_THEME_TOKEN
-gh variable set --env theme-preview SHOPIFY_FLAG_STORE --body example.myshopify.com</code></pre>
-              <p class="copy-status" role="status" x-text="status"></p>
-            </div>
             <p>
               Only deployment and cleanup jobs use this environment. Keep the
               password environment-scoped and include the named secrets mapping
@@ -301,11 +274,13 @@ gh variable set --env theme-preview SHOPIFY_FLAG_STORE --body example.myshopify.
           >
             <h2 id="workflow-title">Add the GitHub workflow</h2>
             <p>
-              Create <code>.github/workflows/theme-proof.yml</code> in your
-              theme repository. The reusable workflow supplies the separate
-              build, deploy, and cleanup jobs. Prefer this workflow to the
-              single-step Action snippet supplied by Marketplace so builds stay
-              separate from credentialed deployment.
+              In your theme repository, select
+              <strong>Add file → Create new file</strong>. Name it
+              <code>.github/workflows/theme-proof.yml</code>, copy the workflow
+              below, and commit it. The reusable workflow supplies separate
+              build, deploy, and cleanup jobs. Prefer it to the single-step
+              Action snippet supplied by Marketplace so builds stay separate
+              from credentialed deployment.
             </p>
             <p class="notice">
               This example uses the exact <code>v1.0.0</code> release. You can

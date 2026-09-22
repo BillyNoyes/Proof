@@ -23,17 +23,36 @@ In your theme repository, open **Settings → Environments** and create an envir
 
 ### 3. Add the workflow
 
-From the root of your theme repository, run:
+In your theme repository, select **Add file → Create new file** and name it:
 
-```sh
-mkdir -p .github/workflows
-curl -fsSL https://github.com/BillyNoyes/Proof/releases/download/v1.0.0/theme-proof.yml \
-  -o .github/workflows/theme-proof.yml
+```text
+.github/workflows/theme-proof.yml
 ```
 
-Or copy the [ready-made workflow](examples/theme-proof.yml) into `.github/workflows/theme-proof.yml`.
+Paste this workflow and commit the file:
 
-Commit the file and open a pull request. **That’s it** for a complete theme at the repository root, including Dawn.
+```yaml
+name: Theme Proof
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    uses: BillyNoyes/Proof/.github/workflows/preview.yml@v1.0.0
+    with:
+      environment: theme-preview
+    secrets:
+      SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+```
+
+Open a pull request. **That’s it** for a complete theme at the repository root, including Dawn.
 
 > Use this reusable workflow for the complete Proof setup. The snippet offered by GitHub Marketplace is the lower-level deployment Action, not the isolated build/deploy workflow.
 

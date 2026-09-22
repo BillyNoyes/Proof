@@ -39,6 +39,7 @@ describe('reusable workflow security policy', () => {
       workflow.on.workflow_call.secrets.SHOPIFY_CLI_THEME_TOKEN?.required,
     ).toBe(false);
     for (const path of [
+      '../README.md',
       '../examples/theme-proof.yml',
       '../site/docs/index.html',
     ]) {
@@ -54,6 +55,7 @@ describe('reusable workflow security policy', () => {
       await readFile(new URL('../package.json', import.meta.url), 'utf8'),
     ) as {version: string};
     for (const path of [
+      '../README.md',
       '../examples/theme-proof.yml',
       '../site/docs/index.html',
     ]) {
@@ -70,7 +72,9 @@ describe('reusable workflow security policy', () => {
     expect(readme).toContain(
       'https://github.com/marketplace/actions/theme-proof',
     );
-    expect(readme).toContain('releases/download/v1.0.0/theme-proof.yml');
+    expect(readme).toContain('Add file → Create new file');
+    expect(readme).not.toContain('curl ');
+    expect(readme).not.toContain('gh secret set');
   });
 
   it('ships a complete ready-made caller workflow', async () => {
@@ -108,6 +112,13 @@ describe('reusable workflow security policy', () => {
         SHOPIFY_CLI_THEME_TOKEN: '${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}',
       },
     });
+    const readme = await readFile(
+      new URL('../README.md', import.meta.url),
+      'utf8',
+    );
+    const quickStart = /```yaml\n([\s\S]*?)```/.exec(readme)?.[1];
+    expect(quickStart).toBeDefined();
+    expect(parse(quickStart!)).toEqual(caller);
   });
 
   it('enforces same-repository pull_request events for every job', () => {
