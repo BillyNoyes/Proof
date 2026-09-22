@@ -38,7 +38,10 @@ describe('reusable workflow security policy', () => {
     expect(
       workflow.on.workflow_call.secrets.SHOPIFY_CLI_THEME_TOKEN?.required,
     ).toBe(false);
-    for (const path of ['../README.md', '../site/docs/index.html']) {
+    for (const path of [
+      '../examples/theme-proof.yml',
+      '../site/docs/index.html',
+    ]) {
       const example = await readFile(new URL(path, import.meta.url), 'utf8');
       expect(example).toContain(
         'SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}',
@@ -50,16 +53,61 @@ describe('reusable workflow security policy', () => {
     const {version} = JSON.parse(
       await readFile(new URL('../package.json', import.meta.url), 'utf8'),
     ) as {version: string};
-    for (const path of ['../README.md', '../site/docs/index.html']) {
+    for (const path of [
+      '../examples/theme-proof.yml',
+      '../site/docs/index.html',
+    ]) {
       const example = await readFile(new URL(path, import.meta.url), 'utf8');
       expect(example).toContain(
         `uses: BillyNoyes/Proof/.github/workflows/preview.yml@v${version}`,
       );
       expect(example).not.toContain('preview.yml@main');
-      expect(example).toContain(
-        'https://github.com/marketplace/actions/theme-proof',
-      );
     }
+    const readme = await readFile(
+      new URL('../README.md', import.meta.url),
+      'utf8',
+    );
+    expect(readme).toContain(
+      'https://github.com/marketplace/actions/theme-proof',
+    );
+    expect(readme).toContain('releases/download/v1.0.0/theme-proof.yml');
+  });
+
+  it('ships a complete ready-made caller workflow', async () => {
+    const caller = parse(
+      await readFile(
+        new URL('../examples/theme-proof.yml', import.meta.url),
+        'utf8',
+      ),
+    ) as {
+      on: {pull_request: {types: string[]}};
+      permissions: Record<string, string>;
+      jobs: {
+        preview: {
+          if: string;
+          uses: string;
+          with: {environment: string};
+          secrets: Record<string, string>;
+        };
+      };
+    };
+    expect(caller.on.pull_request.types).toEqual([
+      'opened',
+      'synchronize',
+      'reopened',
+      'closed',
+    ]);
+    expect(caller.permissions).toEqual({
+      contents: 'read',
+      'pull-requests': 'write',
+    });
+    expect(caller.jobs.preview).toMatchObject({
+      if: 'github.event.pull_request.head.repo.full_name == github.repository',
+      with: {environment: 'theme-preview'},
+      secrets: {
+        SHOPIFY_CLI_THEME_TOKEN: '${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}',
+      },
+    });
   });
 
   it('enforces same-repository pull_request events for every job', () => {

@@ -34,7 +34,7 @@ Additional validation tightens comment identity, URL paths and credentials, conf
 
 ## Release-candidate validation
 
-- 73 Action/core tests, including real subprocess tests and YAML workflow-policy assertions.
+- 74 Action/core tests, including real subprocess tests and YAML workflow-policy assertions.
 - 24 site interaction and animation-lifecycle tests.
 - Formatting, typed linting, and strict TypeScript checks.
 - Self-contained Node 24 CommonJS Action bundles and generated license notices.

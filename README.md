@@ -4,89 +4,53 @@
 
 [Website](https://proof.billynoyes.co.uk/) · [Documentation](https://proof.billynoyes.co.uk/docs/) · [GitHub Marketplace](https://github.com/marketplace/actions/theme-proof)
 
-Proof builds each pull request without store credentials, deploys the validated theme files as a Shopify development preview, and keeps one PR comment updated with storefront and Theme Editor links. Closing the PR removes the preview.
+Proof builds each pull request, deploys it as a Shopify development preview, and adds the storefront and Theme Editor links to the PR. Closing the PR removes the preview.
 
-## Set up Proof
+## Get started
 
-You need a Shopify store with the free [Theme Access app](https://apps.shopify.com/theme-access) and a theme repository on GitHub.
+### 1. Create a Theme Access password
 
-### 1. Add the GitHub environment
+Install Shopify’s free [Theme Access app](https://apps.shopify.com/theme-access) on your preview store and create a dedicated password for Proof.
 
-Create a repository environment named `theme-preview`, then add:
+### 2. Add two GitHub environment values
+
+In your theme repository, open **Settings → Environments** and create an environment named `theme-preview`.
 
 | Name                      | Type     | Value                                    |
 | ------------------------- | -------- | ---------------------------------------- |
-| `SHOPIFY_CLI_THEME_TOKEN` | Secret   | A dedicated Theme Access password        |
+| `SHOPIFY_CLI_THEME_TOKEN` | Secret   | The Theme Access password                |
 | `SHOPIFY_FLAG_STORE`      | Variable | Your full `example.myshopify.com` domain |
 
-Never commit the Theme Access password. Delete it in Theme Access to revoke Proof's store access.
+### 3. Add the workflow
 
-### 2. Add the workflow
+From the root of your theme repository, run:
 
-Create `.github/workflows/theme-proof.yml`:
-
-```yaml
-name: Theme Proof
-
-on:
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-
-permissions:
-  contents: read
-  pull-requests: write
-
-jobs:
-  preview:
-    if: github.event.pull_request.head.repo.full_name == github.repository
-    uses: BillyNoyes/Proof/.github/workflows/preview.yml@v1.0.0
-    with:
-      environment: theme-preview
-    secrets:
-      SHOPIFY_CLI_THEME_TOKEN: ${{ secrets.SHOPIFY_CLI_THEME_TOKEN }}
+```sh
+mkdir -p .github/workflows
+curl -fsSL https://github.com/BillyNoyes/Proof/releases/download/v1.0.0/theme-proof.yml \
+  -o .github/workflows/theme-proof.yml
 ```
 
-Use the reusable workflow above rather than putting build and deployment steps in one job. It keeps untrusted PR builds separate from Shopify credentials. Fork PRs are intentionally skipped.
+Or copy the [ready-made workflow](examples/theme-proof.yml) into `.github/workflows/theme-proof.yml`.
 
-### 3. Configure your build when needed
+Commit the file and open a pull request. **That’s it** for a complete theme at the repository root, including Dawn.
 
-No configuration is required when a complete Shopify theme is at the repository root and needs no build, including Dawn.
+> Use this reusable workflow for the complete Proof setup. The snippet offered by GitHub Marketplace is the lower-level deployment Action, not the isolated build/deploy workflow.
 
-For a project with a build step, add `theme-proof.config.json`:
+## Does your theme have a build step?
 
-```json
-{
-  "$schema": "https://raw.githubusercontent.com/BillyNoyes/Proof/main/schema/theme-proof.schema.json",
-  "version": 1,
-  "build": {
-    "workingDirectory": ".",
-    "install": "npm ci",
-    "command": "npm run build",
-    "themeDirectory": "dist"
-  }
-}
-```
+Add a small `theme-proof.config.json` describing your install command, build command, and deployable theme directory. See [Build configuration](https://proof.billynoyes.co.uk/docs/#configuration) for examples covering Vite, Easel, nested projects, and no-build themes.
 
-`workingDirectory` and `themeDirectory` are relative to the repository root. The output must be a complete deployable theme, not only compiled assets. Optional `setup`, `install`, and `command` steps run in that order.
+## What Proof does
 
-See the [full documentation](https://proof.billynoyes.co.uk/docs/) for nested projects, environment approvals, lifecycle behavior, troubleshooting, and security details.
+1. Builds PR code in a read-only job with no Shopify credentials.
+2. Validates and deploys only the theme files as a development preview.
+3. Updates one PR comment with preview links and removes the preview when the PR closes.
 
-## Safety model
+Proof never targets live or existing themes. Read the [documentation](https://proof.billynoyes.co.uk/docs/) for security details, troubleshooting, and lifecycle behavior.
 
-- PR code runs in a read-only build job without Shopify credentials.
-- The deployment job does not check out or execute repository scripts.
-- Only Shopify theme directories are transferred, with file, size, path, and symlink validation.
-- Proof creates development-context themes only. It does not target live or existing themes.
-- Deployment and cleanup verify current PR and remote theme state before changing anything.
-- Internal Actions and Shopify CLI are pinned to reviewed versions.
+## Support
 
-Private development-store lifecycle testing covered creation, updates, context reuse, comments, manual deletion and recreation, cleanup, stale runs, and cancellation. See [INTEGRATION.md](INTEGRATION.md) for the sanitized results and remaining limits.
-
-## Support and development
-
-- Read the [documentation](https://proof.billynoyes.co.uk/docs/).
-- Open a [bug or feature request](https://github.com/BillyNoyes/Proof/issues/new/choose).
-- Report security issues through [private vulnerability reporting](https://github.com/BillyNoyes/Proof/security/advisories/new).
-- Read [CONTRIBUTING.md](CONTRIBUTING.md) to work on Proof.
+[Open an issue](https://github.com/BillyNoyes/Proof/issues/new/choose) or report security issues through [private vulnerability reporting](https://github.com/BillyNoyes/Proof/security/advisories/new).
 
 Proof is MIT licensed and independently developed, with no Shopify sponsorship or endorsement.
