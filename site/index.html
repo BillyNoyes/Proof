@@ -44,6 +44,7 @@
       crossorigin
     />
     <link rel="stylesheet" href="/src/style.css" />
+    <script type="module" src="/src/main.ts"></script>
     <title>Proof · Preview your Shopify theme</title>
   </head>
   <body>
@@ -64,73 +65,227 @@
       </header>
       <main class="home-main" id="main" tabindex="-1">
         <div class="hero-copy">
-          <p class="text-sm muted">Pull request previews for Shopify themes</p>
-          <h1>Review the theme.<br />Before the merge.</h1>
+          <h1>Review the theme. Before the merge.</h1>
           <p class="hero-description">
-            Give each pull request a theme preview. Keep the storefront and
-            Theme Editor links right where the review happens.
+            Pull request previews for Shopify themes. From your code to a link
+            in GitHub.
           </p>
-          <div class="flex flex-wrap items-center gap-3">
-            <a class="button button-primary" href="%BASE_URL%docs/"
-              >Read the docs <span aria-hidden="true">→</span></a
-            ><a
-              class="button"
-              href="https://github.com/marketplace/actions/theme-proof"
-              >View on Marketplace</a
-            >
-          </div>
         </div>
-        <section class="workflow" aria-labelledby="workflow-title">
-          <div class="workflow-heading">
-            <h2 id="workflow-title">From pull request to preview</h2>
-            <span>GitHub Actions</span>
+        <section
+          class="preview-demo"
+          aria-labelledby="workflow-title"
+          x-data="previewDemo($el)"
+          data-step="3"
+          :data-step="step"
+          data-running="false"
+          :data-running="running ? 'true' : 'false'"
+        >
+          <h2 id="workflow-title" class="sr-only">How Proof works</h2>
+          <div class="demo-controls" x-cloak>
+            <div class="demo-steps" role="group" aria-label="Walkthrough steps">
+              <button
+                type="button"
+                @click="select(0)"
+                :aria-pressed="step === 0"
+              >
+                <span>01</span> Open a PR
+              </button>
+              <button
+                type="button"
+                @click="select(1)"
+                :aria-pressed="step === 1"
+              >
+                <span>02</span> Build
+              </button>
+              <button
+                type="button"
+                @click="select(2)"
+                :aria-pressed="step === 2"
+              >
+                <span>03</span> Deploy
+              </button>
+              <button
+                type="button"
+                @click="select(3)"
+                :aria-pressed="step === 3"
+              >
+                <span>04</span> Review
+              </button>
+            </div>
+            <button
+              class="demo-playback"
+              type="button"
+              x-show="!reducedMotion"
+              @click="toggle"
+              :aria-label="controlLabel"
+              :title="controlLabel"
+            >
+              <svg x-show="step === 3" aria-hidden="true" viewBox="0 0 20 20">
+                <path d="M4 7a6.5 6.5 0 1 1-.2 5M4 3v4h4" />
+              </svg>
+              <svg
+                x-show="step !== 3 && playing"
+                aria-hidden="true"
+                viewBox="0 0 20 20"
+              >
+                <path d="M7 4v12M13 4v12" />
+              </svg>
+              <svg
+                x-show="step !== 3 && !playing"
+                aria-hidden="true"
+                viewBox="0 0 20 20"
+              >
+                <path d="m6 4 10 6-10 6Z" />
+              </svg>
+            </button>
           </div>
-          <ol class="workflow-list">
-            <li class="workflow-step">
-              <span class="workflow-node" aria-hidden="true">1</span>
-              <div class="min-w-0">
-                <h3>Build your theme</h3>
-                <p>
-                  Your commands, or no build at all. No Shopify credentials in
-                  this job.
-                </p>
-                <div class="workflow-code">
-                  <pre
-                    tabindex="0"
-                    role="region"
-                    aria-label="Example no-build configuration"
-                  ><code>{
-  "version": 1,
-  "build": { "themeDirectory": "." }
-}</code></pre>
+          <div class="demo-window">
+            <div class="demo-toolbar">
+              <span class="demo-repository"
+                ><svg aria-hidden="true" viewBox="0 0 20 20">
+                  <path
+                    d="M4 3h11v14H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm0 10h11M5 6h6"
+                  /></svg
+                >example / storefront</span
+              >
+              <span>Illustrative demo</span>
+            </div>
+            <div class="demo-workspace">
+              <div class="demo-pr">
+                <div class="demo-compose">
+                  <p class="demo-eyebrow">Open a pull request</p>
+                  <div class="demo-branches">
+                    <code>main</code><span aria-hidden="true">←</span
+                    ><code>summer-refresh</code>
+                  </div>
+                  <p class="demo-title-field">Refresh the summer collection</p>
+                  <p class="demo-description-field">
+                    A new look for the season.<br /><span
+                      >Ready for a second pair of eyes.</span
+                    >
+                  </p>
+                  <span class="demo-create" aria-hidden="true"
+                    >Create pull request</span
+                  >
+                </div>
+                <div class="demo-thread">
+                  <div class="demo-pr-heading">
+                    <h3>Refresh the summer collection <span>#128</span></h3>
+                    <div class="demo-branches">
+                      <span class="demo-open">Open</span
+                      ><code>summer-refresh</code
+                      ><span aria-hidden="true">→</span><code>main</code>
+                    </div>
+                  </div>
+                  <div class="demo-waiting">
+                    <span class="demo-commit-dot" aria-hidden="true"></span>
+                    <div>
+                      <p>Update the collection layout</p>
+                      <code>a1b2c3d4e5f6</code>
+                    </div>
+                    <p class="demo-waiting-note">
+                      Proof is preparing your preview.
+                    </p>
+                  </div>
+                  <div class="demo-comment">
+                    <div class="demo-comment-heading">
+                      <svg
+                        class="demo-bot"
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                      >
+                        <rect x="4" y="7" width="16" height="13" rx="3" />
+                        <path d="M12 3v4M1 12v4m22-4v4M8 16h8" />
+                        <path d="M8 11v1m8-1v1" />
+                      </svg>
+                      <strong>github-actions</strong
+                      ><span class="demo-bot-label">bot</span
+                      ><span class="demo-comment-time">just now</span>
+                    </div>
+                    <div class="demo-comment-body">
+                      <h4>Theme Proof</h4>
+                      <p>Preview updated for <code>a1b2c3d4e5f6</code>.</p>
+                      <p class="demo-preview-links">
+                        <span>Storefront preview</span
+                        ><span aria-hidden="true"> · </span
+                        ><span>Theme Editor</span>
+                      </p>
+                      <p>
+                        Theme Check: passed<br />Context:
+                        <code>proof-123456-128</code>
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </li>
-            <li class="workflow-step">
-              <span class="workflow-node" aria-hidden="true">2</span>
-              <div>
-                <h3>Deploy the preview</h3>
-                <p>
-                  A separate job validates the theme files and deploys with
-                  Theme Access.
+              <div class="demo-run">
+                <div class="demo-run-heading">
+                  <img
+                    src="%BASE_URL%proof.svg"
+                    alt=""
+                    width="20"
+                    height="20"
+                  />
+                  <h3>Theme Proof</h3>
+                  <span>GitHub Actions</span>
+                </div>
+                <ol class="demo-jobs">
+                  <li
+                    :data-status="step === 1 ? 'running' : step > 1 ? 'complete' : 'waiting'"
+                    data-status="complete"
+                  >
+                    <span class="demo-job-icon" aria-hidden="true"></span
+                    ><span>Build theme</span
+                    ><span
+                      class="demo-job-status"
+                      x-text="step === 1 ? 'Running' : step > 1 ? 'Passed' : 'Waiting'"
+                      >Passed</span
+                    >
+                  </li>
+                  <li
+                    :data-status="step === 2 ? 'running' : step > 2 ? 'complete' : 'waiting'"
+                    data-status="complete"
+                  >
+                    <span class="demo-job-icon" aria-hidden="true"></span
+                    ><span>Deploy preview</span
+                    ><span
+                      class="demo-job-status"
+                      x-text="step === 2 ? 'Running' : step > 2 ? 'Passed' : 'Waiting'"
+                      >Passed</span
+                    >
+                  </li>
+                  <li
+                    :data-status="step === 3 ? 'complete' : 'waiting'"
+                    data-status="complete"
+                  >
+                    <span class="demo-job-icon" aria-hidden="true"></span
+                    ><span>Post preview links</span
+                    ><span
+                      class="demo-job-status"
+                      x-text="step === 3 ? 'Passed' : 'Waiting'"
+                      >Passed</span
+                    >
+                  </li>
+                </ol>
+                <p class="demo-detail" x-text="detail">
+                  One comment, updated on every push. The preview is removed
+                  when you close the PR.
                 </p>
               </div>
-            </li>
-            <li class="workflow-step">
-              <span class="workflow-node" aria-hidden="true">3</span>
-              <div>
-                <h3>Review it in context</h3>
-                <p>
-                  One PR comment for preview links. Cleanup when the pull
-                  request closes.
-                </p>
-              </div>
-            </li>
-          </ol>
-          <p class="workflow-note">
-            Dawn, Easel, or your own toolchain. The build is yours.
-          </p>
+            </div>
+          </div>
+          <p class="sr-only" role="status" x-text="announcement"></p>
         </section>
+        <div class="home-actions">
+          <a class="button button-primary" href="%BASE_URL%docs/"
+            >Read the docs <span aria-hidden="true">→</span></a
+          >
+          <a
+            class="button"
+            href="https://github.com/marketplace/actions/theme-proof"
+            >View on Marketplace</a
+          >
+        </div>
       </main>
       <footer class="site-footer">
         <span>Open source. MIT licensed.</span

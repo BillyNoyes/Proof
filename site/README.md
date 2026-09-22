@@ -1,6 +1,6 @@
 # Proof website
 
-A static, two-page Vite site using Alpine.js and Tailwind CSS. The landing page fits a desktop viewport without hiding overflow; smaller screens and enlarged text reflow naturally. Documentation remains readable without JavaScript.
+A static, two-page Vite site using Alpine.js and Tailwind CSS. The landing page fits a desktop viewport without hiding overflow; smaller screens and enlarged text reflow naturally. The homepage illustrates PR creation, an isolated build, deployment, and a GitHub Actions bot comment. It plays once, then holds the result; visitors can pause, replay, or select a step. Playback suspends in hidden tabs and when the demo is offscreen. Reduced-motion users get an untimed walkthrough, and the completed example remains readable without JavaScript. All demo details are fictional and its preview links are non-interactive. Documentation also remains readable without JavaScript.
 
 ## Development
 
@@ -16,7 +16,7 @@ pnpm test:site:browser
 
 The default local path is `/Proof/`, matching GitHub project Pages. `SITE_BASE_PATH=/ pnpm dev:site` serves from the root instead. Build with `pnpm build:site`; output is in `site/dist`.
 
-Browser checks cover light/dark themes, desktop viewport fit, mobile reflow, direct docs links, navigation, clipboard success/failure, missing JavaScript, and missing assets. Screenshots are written to `site/.screenshots/` (not committed). `CHROME_PATH` can select an existing Chrome installation.
+Browser checks cover light/dark themes, desktop viewport fit and layout stability at every demo step, mobile reflow, playback and keyboard controls, reduced motion, direct docs links, navigation, clipboard success/failure, missing JavaScript, and missing assets. Unit tests cover timer/observer teardown, visibility changes, playback controls, and parity between the illustrated bot comment and the Action's real comment renderer. Screenshots are written to `site/.screenshots/` (not committed). `CHROME_PATH` can select an existing Chrome installation.
 
 ## Deployment
 

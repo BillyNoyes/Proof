@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "tsc && node --experimental-strip-types --test scripts/check-interactions.mjs && vite build && node scripts/check-build.mjs",
+    "check": "tsc && node --experimental-strip-types --test scripts/check-interactions.mjs scripts/check-demo.mjs && vite build && node scripts/check-build.mjs",
     "test:browser": "node scripts/check-browser.mjs"
   },
   "dependencies": {
