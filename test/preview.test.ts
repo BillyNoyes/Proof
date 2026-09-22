@@ -135,19 +135,19 @@ describe('preview lifecycle', () => {
     expect(deps.github.upsertComment).not.toHaveBeenCalled();
   });
 
-  it('removes only the recorded context and then updates the comment', async () => {
+  it('removes the recorded theme and any replacement whose comment failed', async () => {
     const deps = clients({state: 'closed', sha: repository.sha}, state);
     expect(await runPreview({...options, mode: 'cleanup'}, deps)).toEqual({
       status: 'removed',
     });
-    expect(deps.shopify.deleteTheme).toHaveBeenCalledWith(
-      '123',
-      options.context,
-    );
+    expect(deps.shopify.deleteTheme.mock.calls).toEqual([
+      ['123', options.context],
+      [undefined, options.context],
+    ]);
     expect(deps.github.upsertComment.mock.calls[0]?.[0]).toContain(
       'Preview removed',
     );
-    expect(deps.shopify.deleteTheme.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(deps.shopify.deleteTheme.mock.invocationCallOrder[1]).toBeLessThan(
       deps.github.upsertComment.mock.invocationCallOrder[0]!,
     );
   });

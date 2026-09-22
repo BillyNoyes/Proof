@@ -19794,8 +19794,10 @@ async function runPreview(options, { github, shopify }) {
   if (existing) assertMatchingState(existing.state, options);
   if (options.mode === "cleanup") {
     await shopify.deleteTheme(existing?.state.themeId, options.context);
-    if (existing)
+    if (existing) {
+      await shopify.deleteTheme(void 0, options.context);
       await github.upsertComment(renderRemovedComment(existing.state));
+    }
     return { status: "removed" };
   }
   const artifact = await validateThemeArtifact(options.themePath);

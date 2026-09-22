@@ -49,10 +49,12 @@ export async function runPreview(
   const existing = await github.findProofComment();
   if (existing) assertMatchingState(existing.state, options);
   if (options.mode === 'cleanup') {
-    // A push can create a theme even when posting its state comment fails.
+    // An upload can succeed before its comment state is posted or can replace a stale recorded ID.
     await shopify.deleteTheme(existing?.state.themeId, options.context);
-    if (existing)
+    if (existing) {
+      await shopify.deleteTheme(undefined, options.context);
       await github.upsertComment(renderRemovedComment(existing.state));
+    }
     return {status: 'removed'};
   }
 
