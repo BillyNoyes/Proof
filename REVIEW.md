@@ -4,7 +4,7 @@ Review baseline: `de8601e` (before the release-hardening changes).
 
 ## Decision
 
-**Automated checks and private development-store lifecycle validation have passed.** The review found and corrected functional and security defects that passing unit tests had not covered. The subsequent [integration report](INTEGRATION.md) documents actual Theme Access, context reuse, comments, cleanup, and concurrency checks, along with browser-authentication and expiration limits. Marketplace publication still requires GitHub's release-page eligibility checks and the owner's final publishing action.
+**Automated checks and private development-store lifecycle validation have passed.** The review found and corrected functional and security defects that passing unit tests had not covered. The subsequent [integration report](INTEGRATION.md) documents actual Theme Access, context reuse, comments, cleanup, and concurrency checks, along with browser-authentication and expiration limits. The owner published `v0.1.0-alpha.0` on 2026-09-22. The [Marketplace listing](https://github.com/marketplace/actions/theme-proof) and release tag were verified against reviewed commit `af5b6ceb193b4ef55b3c6a77c9ec23d54638f3b8`; this remains an experimental pre-release.
 
 ## Scope
 
@@ -32,7 +32,7 @@ This was a repository review, not an independent penetration test or a store-bac
 
 Additional validation tightens comment identity, URL paths and credentials, config/schema agreement, and GitHub request timeouts. Release preparation pins internal Action references to a reviewed bundle commit instead of a moving branch.
 
-## Validation
+## Release-candidate validation
 
 - 72 Action/core tests, including real subprocess tests and YAML workflow-policy assertions.
 - 15 site interaction tests.
@@ -42,10 +42,9 @@ Additional validation tightens comment identity, URL paths and credentials, conf
 - Public npm registry audit: no known vulnerabilities at review time.
 - CI additionally checks Windows, macOS, Linux, Node 22.12/24, workflow linting, bundle reproducibility, and actual build-Action execution.
 
-## Outstanding gates
+## Follow-up validation
 
 1. **Integration coverage:** the supported lifecycle was validated in a private consumer repository. A missing named-secret authorization was corrected and regression-tested. Authenticated storefront/editor UI, natural seven-day expiration, and a cross-account fork remain outside the executed scope; see [INTEGRATION.md](INTEGRATION.md). Store-specific evidence and identifiers must remain private.
-2. **Marketplace publication:** use GitHub's release UI to validate name availability, choose the Marketplace category, and select the publication checkbox. The repository owner must satisfy GitHub's 2FA and Developer Agreement requirements. A draft release does not establish Marketplace eligibility or publish a listing.
 
 ## Residual limitations
 

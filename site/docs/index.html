@@ -146,9 +146,15 @@
           >
             <h2 id="getting-started-title">Getting started</h2>
             <p class="notice">
-              <strong>Pre-release software.</strong> The Action is not published
-              on Marketplace yet. Private development-store lifecycle tests have
-              passed. Use a dedicated development store for experiments, not a
+              <strong>Alpha release.</strong> Proof
+              <a
+                href="https://github.com/BillyNoyes/Proof/releases/tag/v0.1.0-alpha.0"
+                >v0.1.0-alpha.0</a
+              >
+              is available on
+              <a href="https://github.com/marketplace/actions/theme-proof"
+                >GitHub Marketplace</a
+              >. Use a dedicated development store while evaluating it, not a
               production store.
             </p>
             <p>
@@ -301,14 +307,16 @@ gh variable set --env theme-preview SHOPIFY_FLAG_STORE --body example.myshopify.
             <p>
               Create <code>.github/workflows/theme-proof.yml</code> in your
               theme repository. The reusable workflow supplies the separate
-              build, deploy, and cleanup jobs.
+              build, deploy, and cleanup jobs. Prefer this workflow to the
+              single-step Action snippet supplied by Marketplace so builds stay
+              separate from credentialed deployment.
             </p>
             <p class="notice">
-              This experimental example uses <code>@main</code>, which can
-              change. There is no <code>v1</code> release yet. Internal Action
-              references are pinned to a reviewed bundle commit. Pin this caller
-              to a reviewed commit SHA when validating a release candidate. Do
-              not treat this example as a production release.
+              This example uses the published
+              <code>v0.1.0-alpha.0</code> pre-release, not a stable
+              <code>v1</code>. For an immutable reference, replace the tag with
+              <code>af5b6ceb193b4ef55b3c6a77c9ec23d54638f3b8</code>. Internal
+              Action references are also pinned to reviewed commits.
             </p>
             <div class="code-block" x-data="copyCode($el)">
               <div class="code-header">
@@ -341,7 +349,7 @@ permissions:
 jobs:
   preview:
     if: github.event.pull_request.head.repo.full_name == github.repository
-    uses: BillyNoyes/Proof/.github/workflows/preview.yml@main
+    uses: BillyNoyes/Proof/.github/workflows/preview.yml@v0.1.0-alpha.0
     with:
       config: theme-proof.config.json
       environment: theme-preview
@@ -692,12 +700,14 @@ jobs:
             tabindex="-1"
             aria-labelledby="release-status-title"
           >
-            <h2 id="release-status-title">Before the first release</h2>
+            <h2 id="release-status-title">Release status</h2>
             <p>
-              Proof is an open-source, pre-release GitHub Action. Build
-              configuration, artifact validation, deployment, comments, and
-              cleanup have an implementation and automated tests. There is no
-              stable tag or Marketplace listing yet.
+              Proof <code>v0.1.0-alpha.0</code> is published on
+              <a href="https://github.com/marketplace/actions/theme-proof"
+                >GitHub Marketplace</a
+              >. It includes build configuration, artifact validation,
+              deployment, comments, and cleanup. This is an experimental alpha;
+              there is no stable <code>v1</code> release yet.
             </p>
             <p>
               The preview lifecycle has passed private development-store tests,
@@ -707,8 +717,8 @@ jobs:
                 href="https://github.com/BillyNoyes/Proof/blob/main/INTEGRATION.md"
                 >integration report</a
               >
-              for coverage and limits. Marketplace publication is the next step;
-              existing and unpublished theme modes remain future work.
+              for coverage and limits. Existing and unpublished theme modes
+              remain future work.
             </p>
             <p>
               <a href="https://github.com/BillyNoyes/Proof/blob/main/PLAN.md"

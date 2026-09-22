@@ -46,6 +46,23 @@ describe('reusable workflow security policy', () => {
     }
   });
 
+  it('documents the released caller and an immutable pin instead of main', async () => {
+    const {version} = JSON.parse(
+      await readFile(new URL('../package.json', import.meta.url), 'utf8'),
+    ) as {version: string};
+    for (const path of ['../README.md', '../site/docs/index.html']) {
+      const example = await readFile(new URL(path, import.meta.url), 'utf8');
+      expect(example).toContain(
+        `uses: BillyNoyes/Proof/.github/workflows/preview.yml@v${version}`,
+      );
+      expect(example).not.toContain('preview.yml@main');
+      expect(example).toContain('af5b6ceb193b4ef55b3c6a77c9ec23d54638f3b8');
+      expect(example).toContain(
+        'https://github.com/marketplace/actions/theme-proof',
+      );
+    }
+  });
+
   it('enforces same-repository pull_request events for every job', () => {
     for (const job of Object.values(workflow.jobs)) {
       expect(job.if).toContain("github.event_name == 'pull_request'");

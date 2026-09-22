@@ -2,11 +2,11 @@
 
 **Theme Proof — automatic pull request previews for Shopify Liquid themes.**
 
-[Website](https://proof.billynoyes.co.uk/) · [Documentation](https://proof.billynoyes.co.uk/docs/)
+[Website](https://proof.billynoyes.co.uk/) · [Documentation](https://proof.billynoyes.co.uk/docs/) · [GitHub Marketplace](https://github.com/marketplace/actions/theme-proof)
 
 Proof is an open-source GitHub Action that builds a theme for each pull request, deploys it as a Shopify preview, and maintains one comment with the latest storefront and Theme Editor links.
 
-> **Status:** early implementation. The deployment core and project configuration are under active development; no stable GitHub Action, app, or npm package has been published yet.
+> **Status:** [v0.1.0-alpha.0](https://github.com/BillyNoyes/Proof/releases/tag/v0.1.0-alpha.0) is available on GitHub Marketplace. This is an experimental pre-release, not a stable v1. Use a dedicated development store while evaluating it.
 
 ## Product identity
 
@@ -16,20 +16,20 @@ Proof is an open-source GitHub Action that builds a theme for each pull request,
 | Long name               | Theme Proof        |
 | GitHub repository       | `BillyNoyes/Proof` |
 | Planned package and CLI | `theme-proof`      |
-| Planned action name     | Theme Proof        |
+| Marketplace action      | Theme Proof        |
 
-GitHub Action references always include the repository owner. A future release would therefore be referenced from `BillyNoyes/Proof`, while the package and CLI remain unscoped as `theme-proof`.
+GitHub Action references include the repository owner: `BillyNoyes/Proof`. The Action and reusable workflow are released; a standalone CLI, npm package, and hosted GitHub App are not provided.
 
 ## Preview workflow
 
 1. Build pull request code without Shopify credentials.
-2. validate the resulting theme artifact.
+2. Validate the resulting theme artifact.
 3. Deploy it with Shopify CLI and a Theme Access credential.
 4. Reuse a stable development context for subsequent commits.
 5. Create or update one pull request comment with preview links and checks.
 6. Delete the preview when the pull request closes.
 
-Proof will use Shopify-supported primitives including Theme Access credentials, `shopify theme push --development --development-context`, machine-readable `--json` output, strict Theme Check validation, and non-interactive theme deletion.
+Proof uses Shopify-supported primitives including Theme Access credentials, `shopify theme push --development --development-context`, machine-readable `--json` output, strict Theme Check validation, and non-interactive theme deletion.
 
 ## Project configuration
 
@@ -70,7 +70,9 @@ gh variable set --env theme-preview SHOPIFY_FLAG_STORE --body example.myshopify.
 
 The reusable workflow reads the secret and variable only in its privileged deployment and cleanup jobs. The untrusted build job does not receive the environment. Keep the password environment-scoped and include the named `secrets` mapping shown below to authorize access from the called workflow; do not use broad `secrets: inherit`.
 
-For development-store experiments, add this caller workflow. `@main` is not a stable release; use a reviewed commit SHA when validating a release candidate. See [RELEASING.md](RELEASING.md) for the required store-backed checks and Marketplace publication steps.
+Add this caller workflow to `.github/workflows/theme-proof.yml` in your theme repository. Use the reusable workflow rather than Marketplace's single-step Action snippet to keep builds separate from credentialed deployment and cleanup.
+
+The example uses the published `v0.1.0-alpha.0` pre-release. For an immutable reference, replace the tag with its reviewed commit SHA: `af5b6ceb193b4ef55b3c6a77c9ec23d54638f3b8`. Internal Action references are also SHA-pinned. There is no stable `v1` alias.
 
 ```yaml
 name: Theme Proof
@@ -86,7 +88,7 @@ permissions:
 jobs:
   preview:
     if: github.event.pull_request.head.repo.full_name == github.repository
-    uses: BillyNoyes/Proof/.github/workflows/preview.yml@main
+    uses: BillyNoyes/Proof/.github/workflows/preview.yml@v0.1.0-alpha.0
     with:
       config: theme-proof.config.json
       environment: theme-preview
@@ -98,7 +100,7 @@ Fork pull requests do not receive the Environment secret and therefore do not de
 
 ## Security model
 
-Untrusted pull request code must never run with Shopify credentials. Proof will separate builds from deployment:
+Untrusted pull request code must never run with Shopify credentials. Proof separates builds from deployment:
 
 - The build job has only `contents: read`, no Shopify environment, and checks out the PR head SHA before producing an artifact.
 - The deployment job does not execute repository scripts. It accepts only validated theme files and holds the Theme Access credential.
@@ -109,7 +111,7 @@ Untrusted pull request code must never run with Shopify credentials. Proof will 
 
 ## Current implementation
 
-The repository now contains an early TypeScript implementation of:
+The alpha release includes:
 
 - static JSON project configuration with JSON Schema;
 - optional setup, install, and build commands in the untrusted build action;
@@ -125,7 +127,7 @@ This is not a stable release yet. Private development-store lifecycle testing ha
 
 ## Scope
 
-The first release will provide a reusable GitHub Actions workflow and deployment action. A hosted GitHub App may follow after the workflow and security model are proven.
+The alpha release provides a reusable GitHub Actions workflow and deployment action. A hosted GitHub App may follow after the workflow and security model are proven.
 
 Proof is independently developed and has no Shopify sponsorship or endorsement.
 
