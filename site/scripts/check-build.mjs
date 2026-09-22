@@ -13,7 +13,7 @@ for (const page of ['index.html', 'docs/index.html']) {
   assert.match(html, /name="description"/);
   assert.match(html, /rel="canonical"/);
   assert.match(html, /Skip to content/);
-  assert.doesNotMatch(html, /%BASE_URL%|\/src\/|@v1/);
+  assert.doesNotMatch(html, /%BASE_URL%|\/src\/|@v1(?:\s|["'])/);
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(new Set(ids).size, ids.length, `${page}: duplicate IDs`);
   const pageUrl = new URL(base + page.replace(/index\.html$/, ''), origin);

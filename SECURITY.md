@@ -10,4 +10,4 @@ Include the affected commit or version, a minimal reproduction, expected and obs
 
 ## Supported versions
 
-Proof is pre-release software. Security fixes are applied to the latest commit on `main` until the first stable release.
+Security fixes are provided for the latest stable major release and the latest commit on `main`. Upgrade to the newest `v1` release before reporting an issue that may already be fixed.

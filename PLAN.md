@@ -40,22 +40,21 @@ Shopify supports the core workflow through public tooling:
 - `shopify theme delete --theme <id> --force` supports non-interactive cleanup.
 - Development themes do not count toward the normal theme limit and are removed after seven days of inactivity.
 
-The initial implementation should pin and test a supported Shopify CLI version. CLI flags and JSON output must be treated as an external contract with compatibility tests.
+The workflow pins Shopify CLI 4.8.0. CLI flags and JSON output are treated as an external contract with compatibility tests.
 
 ## Naming and distribution
 
-| Surface                    | Planned value           |
-| -------------------------- | ----------------------- |
-| Product                    | Proof                   |
-| Long name                  | Theme Proof             |
-| Repository                 | `BillyNoyes/Proof`      |
-| npm package                | `theme-proof`           |
-| CLI executable             | `theme-proof`           |
-| GitHub Action display name | Theme Proof             |
-| GitHub check               | `Theme Proof / Preview` |
-| Development context prefix | `proof-`                |
+| Surface                    | Value                           |
+| -------------------------- | ------------------------------- |
+| Product                    | Proof                           |
+| Long name                  | Theme Proof                     |
+| Repository                 | `BillyNoyes/Proof`              |
+| Marketplace Action         | Theme Proof                     |
+| Reusable workflow          | `.github/workflows/preview.yml` |
+| Development context prefix | `proof-`                        |
+| npm package / CLI          | Not published                   |
 
-The npm package will be unscoped. GitHub Action syntax necessarily contains the repository owner, but the product and package name will not.
+GitHub Action syntax necessarily contains the repository owner. Proof does not currently ship a standalone npm package or CLI.
 
 ## Authentication model
 
@@ -68,11 +67,10 @@ The store owner installs Shopify's Theme Access app, generates a dedicated passw
 
 The reusable workflow attaches the Environment only to deployment and cleanup jobs. Callers authorize the named `SHOPIFY_CLI_THEME_TOKEN` secret through an explicit mapping rather than broad inheritance; the actual password remains environment-scoped and the untrusted build job has no Environment. Repositories can add required reviewers or deployment restrictions, although requiring review prevents fully automatic previews.
 
-The workflow uses the repository `GITHUB_TOKEN` only for pull request comments and checks. It needs minimal permissions:
+The workflow uses the repository `GITHUB_TOKEN` only for pull request comments. It needs minimal permissions:
 
 - `contents: read`
 - `pull-requests: write`
-- `checks: write` when checks are enabled
 
 ### Future hosted GitHub App
 
@@ -147,8 +145,8 @@ Hash or truncate the value if Shopify imposes a context length limit.
 
 1. Cancel an older in-progress build for the same pull request; serialize remote mutations without canceling an active deployment.
 2. Build the latest commit without credentials.
-3. Validate and upload the artifact.
-4. Check current PR state and head SHA, then push with the stable development context and JSON output.
+3. Validate the artifact and check the current PR state and head SHA.
+4. Push with the stable development context and JSON output.
 5. Record the returned theme ID and URLs.
 6. Create or edit the bot-owned pull request comment.
 
@@ -174,8 +172,7 @@ Storefront preview
 Theme Editor
 
 Theme Check: passed
-Build: passed
-Updated: <timestamp>
+Context: <development-context>
 ```
 
 The comment must never contain Theme Access credentials, storefront passwords, customer data, or full environment dumps.
@@ -208,9 +205,9 @@ The comment must never contain Theme Access credentials, storefront passwords, c
 
 A reusable workflow is preferable to a single action for the full preview flow because GitHub jobs are the security boundary between untrusted builds and privileged deployment. Individual deployment and cleanup actions can live inside the same repository.
 
-## Proposed interface
+## Released interface
 
-Build-action inputs should remain small and explicit:
+Build-action inputs are small and explicit:
 
 - `config`: static JSON config path, default `theme-proof.config.json`.
 
@@ -221,21 +218,19 @@ Deployment inputs are trusted workflow policy:
 - `target-mode`: initially only `development-context`.
 - `shopify-cli-version`: pinned supported CLI version.
 - `strict`: require Theme Check success, default `true`.
-- `cleanup`: remove previews when pull requests close, default `true`.
 
-Outputs:
+The deployment Action outputs:
 
 - `theme-id`
 - `preview-url`
 - `editor-url`
-- `shop`
-- `deployed-sha`
+- `context`
 
 Avoid accepting arbitrary Shopify CLI arguments in the privileged job. Model safe options explicitly and reject live-theme flags.
 
 ## Current implementation status
 
-Implemented in the initial prototype:
+Implemented in v1:
 
 - Static versioned project configuration and JSON Schema.
 - Setup, install, build, and no-build paths.
@@ -256,7 +251,7 @@ Remaining validation limits:
 - Natural development-theme expiration was not observed; manual deletion and already-missing themes were tested.
 - Fork guards were executed with synthetic events through the bundled Action, not through a separate GitHub account.
 
-## MVP milestones
+## Roadmap milestones
 
 ### Milestone 1: research spike
 
@@ -352,7 +347,7 @@ Store-backed tests must never target a live merchant theme.
 - Preview sharing behavior on password-protected stores.
 - Whether the Actions-only version should store state in a comment, check run, deployment, or external artifact.
 - Whether Theme Check should run before artifact upload, again before deployment, or both.
-- Whether the first release should support monorepos and multiple themes.
+- Whether a future release should support multiple themes in one repository beyond one configured nested theme.
 - Whether a hosted App should continue accepting Theme Access or move directly to Shopify OAuth.
 
 ## Product boundaries

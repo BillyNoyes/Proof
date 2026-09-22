@@ -144,16 +144,14 @@
           >
             <h2 id="getting-started-title">Getting started</h2>
             <p class="notice">
-              <strong>Alpha release.</strong> Proof
-              <a
-                href="https://github.com/BillyNoyes/Proof/releases/tag/v0.1.0-alpha.0"
-                >v0.1.0-alpha.0</a
+              <strong>Stable release.</strong> Proof
+              <a href="https://github.com/BillyNoyes/Proof/releases/tag/v1.0.0"
+                >v1.0.0</a
               >
               is available on
               <a href="https://github.com/marketplace/actions/theme-proof"
                 >GitHub Marketplace</a
-              >. Use a dedicated development store while evaluating it, not a
-              production store.
+              >. Use an authorized preview store and never target a live theme.
             </p>
             <p>
               Proof builds pull request code in one job, then deploys the
@@ -310,11 +308,10 @@ gh variable set --env theme-preview SHOPIFY_FLAG_STORE --body example.myshopify.
               separate from credentialed deployment.
             </p>
             <p class="notice">
-              This example uses the published
-              <code>v0.1.0-alpha.0</code> pre-release, not a stable
-              <code>v1</code>. For an immutable reference, replace the tag with
-              <code>af5b6ceb193b4ef55b3c6a77c9ec23d54638f3b8</code>. Internal
-              Action references are also pinned to reviewed commits.
+              This example uses the exact <code>v1.0.0</code> release. You can
+              use the moving <code>v1</code> tag to receive compatible v1
+              updates. Internal Action references remain pinned to reviewed
+              commits.
             </p>
             <div class="code-block" x-data="copyCode($el)">
               <div class="code-header">
@@ -347,7 +344,7 @@ permissions:
 jobs:
   preview:
     if: github.event.pull_request.head.repo.full_name == github.repository
-    uses: BillyNoyes/Proof/.github/workflows/preview.yml@v0.1.0-alpha.0
+    uses: BillyNoyes/Proof/.github/workflows/preview.yml@v1.0.0
     with:
       config: theme-proof.config.json
       environment: theme-preview
@@ -700,12 +697,11 @@ jobs:
           >
             <h2 id="release-status-title">Release status</h2>
             <p>
-              Proof <code>v0.1.0-alpha.0</code> is published on
+              Proof <code>v1.0.0</code> is the first stable release on
               <a href="https://github.com/marketplace/actions/theme-proof"
                 >GitHub Marketplace</a
               >. It includes build configuration, artifact validation,
-              deployment, comments, and cleanup. This is an experimental alpha;
-              there is no stable <code>v1</code> release yet.
+              development-context deployment, comments, and cleanup.
             </p>
             <p>
               The preview lifecycle has passed private development-store tests,

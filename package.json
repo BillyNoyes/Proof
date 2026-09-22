@@ -1,6 +1,6 @@
 {
   "name": "theme-proof",
-  "version": "0.1.0-alpha.0",
+  "version": "1.0.0",
   "description": "Automatic pull request previews for Shopify Liquid themes",
   "private": true,
   "type": "module",

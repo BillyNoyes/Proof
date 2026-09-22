@@ -45,11 +45,11 @@ Unit tests and inspection of CLI source are not substitutes for these runs. Keep
 
 ## Prepare a version
 
-1. Choose an explicit pre-release version while the project remains experimental; do not create `v1` as an alias for an unvalidated alpha.
+1. Choose a semantic version. Create or move the `v1` alias only after the exact stable release commit passes every required gate.
 2. Pin the reusable workflow's build/deploy/cleanup Action references to the reviewed bundle commit. That commit can precede the release commit that updates documentation and references.
 3. Run all checks and commit the exact release tree. Ensure CI passes for that commit.
 4. Prepare release notes with supported features, required credentials, permissions, known limitations, consumer test evidence, and SHA-pinned usage.
-5. Draft the release against that commit. Leave it unpublished while any validation item is pending. Do not mark an alpha as the latest stable release.
+5. Draft the release against that commit. Leave it unpublished while any validation item is pending. Mark a release as a pre-release only when its version and support status are explicitly pre-release.
 
 ## Publish to Marketplace
 
@@ -62,8 +62,8 @@ After validation:
 3. Select **Publish this Action to the GitHub Marketplace**.
 4. Resolve any metadata or naming errors reported by GitHub.
 5. Choose **Deployment** as the primary category; optionally choose **Continuous integration** as a secondary category if available.
-6. Confirm the version, target commit, pre-release status, and completed store-validation evidence, then publish.
-7. Verify the actual Marketplace listing and the released caller workflow. Update README/site examples and release status to the published version.
+6. Confirm the version, target commit, stable or pre-release status, and completed store-validation evidence, then publish.
+7. Verify the actual Marketplace listing and the released caller workflow. For a stable major, create or update its moving major tag only after the immutable release tag is correct. Update README/site examples and release status to the published version.
 
 There is no supported `gh release create` flag that selects Marketplace publication. A release URL alone is not proof that an Action was listed.
 

@@ -9,7 +9,7 @@ The preview lifecycle was exercised against an authorized development store usin
 - Shopify CLI: `4.8.0`.
 - Hosted workflow: Ubuntu, Node.js 24, Theme Access authentication.
 
-Later documentation-only changes do not change these tested runtime components.
+The v1 workflow pins runtime commit `78a5f11269ec3a55c06e860453a1bc0c490d6d4b`. Its deployment behavior and build bundle are unchanged from the store-tested revision. It adds a cleanup recovery pass for the case where a replacement upload succeeds but posting its newer comment state fails; that pass reuses the already tested exact-context deletion path and has regression coverage.
 
 ## Results
 

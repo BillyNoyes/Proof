@@ -46,7 +46,7 @@ describe('reusable workflow security policy', () => {
     }
   });
 
-  it('documents the released caller and an immutable pin instead of main', async () => {
+  it('documents the exact release caller instead of main', async () => {
     const {version} = JSON.parse(
       await readFile(new URL('../package.json', import.meta.url), 'utf8'),
     ) as {version: string};
@@ -56,7 +56,6 @@ describe('reusable workflow security policy', () => {
         `uses: BillyNoyes/Proof/.github/workflows/preview.yml@v${version}`,
       );
       expect(example).not.toContain('preview.yml@main');
-      expect(example).toContain('af5b6ceb193b4ef55b3c6a77c9ec23d54638f3b8');
       expect(example).toContain(
         'https://github.com/marketplace/actions/theme-proof',
       );
@@ -84,11 +83,19 @@ describe('reusable workflow security policy', () => {
   });
 
   it('pins every nested Action to a full commit SHA', () => {
+    const proofPins: string[] = [];
     for (const job of Object.values(workflow.jobs)) {
       for (const step of job.steps) {
-        if (step.uses) expect(step.uses).toMatch(/@[a-f0-9]{40}$/);
+        if (!step.uses) continue;
+        expect(step.uses).toMatch(/@[a-f0-9]{40}$/);
+        if (step.uses.startsWith('BillyNoyes/Proof')) {
+          proofPins.push(step.uses.split('@')[1]!);
+        }
       }
     }
+    expect(new Set(proofPins)).toEqual(
+      new Set(['78a5f11269ec3a55c06e860453a1bc0c490d6d4b']),
+    );
   });
 
   it('never checks out PR scripts into credentialed jobs', () => {

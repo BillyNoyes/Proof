@@ -4,7 +4,7 @@ Review baseline: `de8601e` (before the release-hardening changes).
 
 ## Decision
 
-**Automated checks and private development-store lifecycle validation have passed.** The review found and corrected functional and security defects that passing unit tests had not covered. The subsequent [integration report](INTEGRATION.md) documents actual Theme Access, context reuse, comments, cleanup, and concurrency checks, along with browser-authentication and expiration limits. The owner published `v0.1.0-alpha.0` on 2026-09-22. The [Marketplace listing](https://github.com/marketplace/actions/theme-proof) and release tag were verified against reviewed commit `af5b6ceb193b4ef55b3c6a77c9ec23d54638f3b8`; this remains an experimental pre-release.
+**The v1 release candidate has passed automated checks, and its core deployment runtime passed private development-store lifecycle validation.** The review found and corrected functional and security defects that passing unit tests had not covered. The [integration report](INTEGRATION.md) documents actual Theme Access, context reuse, comments, cleanup, and concurrency checks, along with browser-authentication and expiration limits. The stable release keeps the store-tested runtime and adds regression coverage for cleanup after a replacement preview was created but its newer comment state could not be posted.
 
 ## Scope
 
@@ -34,8 +34,8 @@ Additional validation tightens comment identity, URL paths and credentials, conf
 
 ## Release-candidate validation
 
-- 72 Action/core tests, including real subprocess tests and YAML workflow-policy assertions.
-- 15 site interaction tests.
+- 73 Action/core tests, including real subprocess tests and YAML workflow-policy assertions.
+- 24 site interaction and animation-lifecycle tests.
 - Formatting, typed linting, and strict TypeScript checks.
 - Self-contained Node 24 CommonJS Action bundles and generated license notices.
 - Browser checks for both `/Proof/` and root-path hosting in CI, light/dark modes, desktop fit, mobile layout, clipboard behavior, direct links, and no-JavaScript reading.
